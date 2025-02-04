@@ -38,7 +38,7 @@
                         markers.clearLayers();
 
                         result.data.forEach(row => {
-                            const name = row["Name"]?.trim() || row["Place Name"]?.trim(); // Adjust for correct column name
+                            const name = row["Name"]?.trim(); // Adjust for correct column name
                             const location = row["Location"]?.trim();
                             const lat = parseFloat(row["Latitude"]?.trim());
                             const lng = parseFloat(row["Longitude"]?.trim());
