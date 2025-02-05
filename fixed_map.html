@@ -50,25 +50,26 @@
                 markers.clearLayers(); // Clear existing markers before adding new ones
 
                 result.data.forEach(row => {
-    const name = row["Resort/Hotel/Airbnb name"]?.trim();
-    const location = row["Location"]?.trim();
-    const lat = parseFloat(row["Latitude"]?.trim());
-    const lng = parseFloat(row["Longitude"]?.trim());
-    const link = row["Deal Link"]?.trim(); // Get the deal link
+                    const name = row["Name"]?.trim();
+                    const location = row["Location"]?.trim();
+                    const lat = parseFloat(row["Latitude"]?.trim());
+                    const lng = parseFloat(row["Longitude"]?.trim());
+                    const dealLink = row["Deal Link"]?.trim();
 
-    if (name && location && !isNaN(lat) && !isNaN(lng)) {
-        let popupContent = `<b>${name}</b><br>${location}`;
-        
-        // If there is a link, add it as a clickable hyperlink
-        if (link) {
-            popupContent += `<br><a href="${link}" target="_blank">View Deal</a>`;
-        }
+                    console.log("Adding Marker:", name, lat, lng, dealLink); // Debugging
 
-        const marker = L.marker([lat, lng]).bindPopup(popupContent);
-        markers.addLayer(marker);
-    }
-});
+                    if (name && location && !isNaN(lat) && !isNaN(lng)) {
+                        let popupContent = `<b>${name}</b><br>${location}`;
+                        
+                        // If there's a deal link, make it clickable
+                        if (dealLink) {
+                            popupContent += `<br><a href="${dealLink}" target="_blank">View Deal</a>`;
+                        }
 
+                        const marker = L.marker([lat, lng]).bindPopup(popupContent);
+                        markers.addLayer(marker);
+                    }
+                });
 
                 map.addLayer(markers);
                 if (markers.getLayers().length > 0) {
