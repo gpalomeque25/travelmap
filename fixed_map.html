@@ -36,11 +36,15 @@
                     complete: function(result) {
                         console.log("✅ Parsed Data:", result.data); 
 
-                        // Detect correct column names
+                        // Correct column detection
                         const headers = Object.keys(result.data[0] || {});
                         const nameKey = headers.find(h => h.toLowerCase().includes("hotel")) || "Name";
                         const locationKey = headers.find(h => h.toLowerCase().includes("location")) || "Location";
+                        const latKey = headers.find(h => h.toLowerCase().includes("latitude")) || "Latitude";
+                        const lngKey = headers.find(h => h.toLowerCase().includes("longitude")) || "Longitude";
                         const linkKey = headers.find(h => h.toLowerCase().includes("deal")) || "Deal Link";
+
+                        console.log("✅ Matched Columns:", { nameKey, locationKey, latKey, lngKey, linkKey });
 
                         markers.clearLayers();
                         let addedMarkers = 0;
@@ -48,13 +52,14 @@
                         result.data.forEach(row => {
                             const name = row[nameKey]?.trim();
                             const location = row[locationKey]?.trim();
-                            const lat = parseFloat(row["Latitude"]?.trim());
-                            const lng = parseFloat(row["Longitude"]?.trim());
+                            const lat = parseFloat(row[latKey]?.trim());
+                            const lng = parseFloat(row[lngKey]?.trim());
                             let link = row[linkKey]?.trim();
 
-                            if (name && location && !isNaN(lat) && !isNaN(lng)) {
-                                let validLink = link && link.startsWith("http") ? link : (link ? `https://${link}` : null);
+                            // Ensure the link is a valid URL
+                            let validLink = (link && !link.startsWith("http")) ? `https://${link}` : link;
 
+                            if (name && location && !isNaN(lat) && !isNaN(lng)) {
                                 let popupContent = `<b>${name}</b><br>${location}`;
                                 if (validLink) {
                                     popupContent += `<br><a href="${validLink}" target="_blank">View Deal</a>`;
