@@ -11,6 +11,7 @@
 </head>
 <body>
     <div id="map"></div>
+    <p id="status" style="text-align: center; font-weight: bold;">Loading map...</p>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
@@ -23,14 +24,20 @@
 
         async function loadData() {
             try {
+                document.getElementById("status").innerText = "Fetching data...";
+
                 const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?output=csv');
                 const csvText = await response.text();
+                console.log("✅ CSV Data Received:", csvText); // Debugging
 
                 Papa.parse(csvText, {
                     header: true,
                     skipEmptyLines: true,
                     complete: function(result) {
+                        console.log("✅ Parsed Data:", result.data); // Debugging
+
                         markers.clearLayers();
+                        let addedMarkers = 0;
 
                         result.data.forEach(row => {
                             const name = row["Name"]?.trim();
@@ -40,28 +47,38 @@
                             let link = row["Deal Link"]?.trim();
 
                             if (name && location && !isNaN(lat) && !isNaN(lng)) {
-                                // Ensure link is valid
                                 let validLink = link && link.startsWith("http") ? link : (link ? `https://${link}` : null);
-                                
+
                                 let popupContent = `<b>${name}</b><br>${location}`;
                                 if (validLink) {
                                     popupContent += `<br><a href="${validLink}" target="_blank">View Deal</a>`;
                                 }
 
+                                console.log(`📍 Adding Marker: ${name}, Lat: ${lat}, Lng: ${lng}`);
                                 const marker = L.marker([lat, lng]).bindPopup(popupContent);
                                 markers.addLayer(marker);
+                                addedMarkers++;
+                            } else {
+                                console.warn(`⚠️ Skipping row due to missing data:`, row);
                             }
                         });
 
                         map.addLayer(markers);
-                        if (markers.getLayers().length > 0) {
+
+                        if (addedMarkers > 0) {
                             map.fitBounds(markers.getBounds(), { padding: [50, 50] });
+                            document.getElementById("status").style.display = "none";
+                            console.log(`✅ Successfully added ${addedMarkers} markers.`);
+                        } else {
+                            document.getElementById("status").innerText = "No locations found.";
+                            console.warn("⚠️ No valid markers added.");
                         }
                     }
                 });
 
             } catch (error) {
-                console.error('Error loading data:', error);
+                document.getElementById("status").innerText = "Error loading map.";
+                console.error('❌ Error loading data:', error);
             }
         }
 
