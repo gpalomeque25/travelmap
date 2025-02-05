@@ -20,7 +20,7 @@
 
                     // Correct column mapping
                     const headers = Object.keys(result.data[0] || {});
-                    const nameKey = headers.find(h => h.toLowerCase().includes("hotel")) || "Resort/Hotel/Airbnb name";
+                    const nameKey = headers.find(h => h.toLowerCase().includes("hotel")) || "Name";
                     const locationKey = headers.find(h => h.toLowerCase().includes("location")) || "Location";
                     const latKey = headers.find(h => h.toLowerCase().includes("latitude")) || "Latitude";
                     const lngKey = headers.find(h => h.toLowerCase().includes("longitude")) || "Longitude";
