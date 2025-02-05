@@ -60,10 +60,14 @@
 
                         console.log(`✅ Adding Marker: ${name}, ${location}, ${lat}, ${lng}`);
 
-                        let popupContent = `<b>${name}</b><br>${location}`;
-                        if (link && link.startsWith("http")) {
-                            popupContent += `<br><a href="${link}" target="_blank">View Deal</a>`;
-                        }
+                       let popupContent = `<b>${name}</b><br>${location}`;
+if (link) {
+    // Ensure link starts with "http://" or "https://", otherwise add it
+    let validLink = link.startsWith("http") ? link : `https://${link}`;
+    
+    popupContent += `<br><a href="${validLink}" target="_blank">View Deal</a>`;
+}
+
 
                         const marker = L.marker([lat, lng]).bindPopup(popupContent);
                         markers.addLayer(marker);
