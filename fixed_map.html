@@ -4,7 +4,7 @@
     <title>Travel Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script> <!-- CSV Parser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         #map { height: 800px; width: 100%; }
     </style>
@@ -23,46 +23,22 @@
 
         async function loadData() {
             try {
+                console.log("Fetching CSV data...");
                 const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?output=csv');
                 const csvText = await response.text();
+                
+                console.log("Raw CSV Response:", csvText);
 
                 Papa.parse(csvText, {
                     header: true,
                     skipEmptyLines: true,
                     complete: function(result) {
+                        console.log("Parsed CSV Data:", result.data);
                         markers.clearLayers();
+
                         result.data.forEach(row => {
-                            const name = row["Resort/Hotel/Airbnb name"]?.trim();
-                            const location = row["Location"]?.trim();
-                            const lat = parseFloat(row["Latitude"]?.trim());
-                            const lng = parseFloat(row["Longitude"]?.trim());
-                            const link = row["Deal Link"]?.trim(); // Get the deal link
-
-                            if (name && location && !isNaN(lat) && !isNaN(lng)) {
-                                let popupContent = `<b>${name}</b><br>${location}`;
-                                
-                                // If there is a link, add it as a clickable hyperlink
-                                if (link) {
-                                    popupContent += `<br><a href="${link}" target="_blank">View Deal</a>`;
-                                }
-
-                                const marker = L.marker([lat, lng]).bindPopup(popupContent);
-                                markers.addLayer(marker);
-                            }
-                        });
-
-                        map.addLayer(markers);
-                        if (markers.getLayers().length > 0) {
-                            map.fitBounds(markers.getBounds(), { padding: [50, 50] });
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error('Error loading data:', error);
-            }
-        }
-
-        loadData();
-    </script>
-</body>
-</html>
+                            try {
+                                const name = row["Resort/Hotel/Airbnb name"]?.trim();
+                                const location = row["Location"]?.trim();
+                                const lat = parseFloat(row["Latitude"]?.trim());
+                                const lng = parseFloat(row["Longitude"]?.t
