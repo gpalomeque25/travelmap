@@ -28,7 +28,7 @@
     .p-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
       color:#444; margin-bottom:10px; }
 
-    /* Legend â clickable toggles */
+    /* Legend &#8212; clickable toggles */
     .leg-row { display:flex; align-items:center; gap:9px; margin-bottom:7px;
       cursor:pointer; user-select:none; border-radius:5px; padding:3px 5px; margin-left:-5px;
       transition:opacity .15s; }
@@ -92,8 +92,8 @@
 </head>
 <body>
 <div id="titlebar">
-  <h1>ð´ PGC Travel Map</h1>
-  <span class="sub">Holiday Pirates Â· Partner-Generated Content</span>
+  <h1>&#127988; PGC Travel Map</h1>
+  <span class="sub">Holiday Pirates &#183; Partner-Generated Content</span>
   <span id="point-count"></span>
 </div>
 <div id="status-msg"></div>
@@ -102,22 +102,22 @@
 <div id="panel">
   <!-- Legend (clickable filters) -->
   <div class="p-section">
-    <div class="p-title">Legend â click to show/hide</div>
+    <div class="p-title">Legend &#8212; click to show/hide</div>
     <div class="leg-row" id="leg-green" onclick="toggleLegend('green')">
       <div class="leg-dot" style="background:#a9d380"></div>
       <span class="leg-label">PGC Destination</span>
     </div>
     <div class="leg-row" id="leg-blue" onclick="toggleLegend('blue')">
       <div class="leg-dot" style="background:#7ac3dd"></div>
-      <span class="leg-label">(S)PGC Hotel â no budget</span>
+      <span class="leg-label">(S)PGC Hotel &#8212; no budget</span>
     </div>
     <div class="leg-row" id="leg-yellow" onclick="toggleLegend('yellow')">
       <div class="leg-dot" style="background:#fcd988"></div>
-      <span class="leg-label">(S)PGC Hotel â low budget</span>
+      <span class="leg-label">(S)PGC Hotel &#8212; low budget</span>
     </div>
     <div class="leg-row" id="leg-pink" onclick="toggleLegend('pink')">
       <div class="leg-dot" style="background:#f79f9d"></div>
-      <span class="leg-label">(S)PGC Hotel â high budget</span>
+      <span class="leg-label">(S)PGC Hotel &#8212; high budget</span>
     </div>
     <div class="leg-hint">Click any row to toggle visibility</div>
   </div>
@@ -127,14 +127,14 @@
     <div class="p-title">Filters</div>
     <div class="f-row">
       <label class="f-toggle"><input type="checkbox" id="f-family" onchange="applyFilters()">
-        <span class="f-label">ðï¸ Family deals only</span></label>
+        <span class="f-label">&#127958;&#65039; Family deals only</span></label>
     </div>
     <div class="f-row">
       <span class="f-label">Season</span>
       <select class="f-select" id="f-season" onchange="applyFilters()">
         <option value="">All seasons</option>
-        <option value="summer">âï¸ Summer</option>
-        <option value="winter">âï¸ Winter</option>
+        <option value="summer">&#9728;&#65039; Summer</option>
+        <option value="winter">&#10052;&#65039; Winter</option>
       </select>
     </div>
     <div class="f-row">
@@ -146,35 +146,35 @@
         <option value="90">Last 90 days</option>
       </select>
     </div>
-    <button class="btn-reset" onclick="resetAll()">âº Reset all</button>
+    <button class="btn-reset" onclick="resetAll()">&#8634; Reset all</button>
   </div>
 
   <!-- Compensation -->
   <div class="p-section">
     <div class="p-title">PGC Compensation</div>
     <div class="comp-tabs">
-      <div class="comp-tab active" onclick="showComp('video',this)">ð¹ Video</div>
-      <div class="comp-tab" onclick="showComp('photo',this)">ð· Photo</div>
+      <div class="comp-tab active" onclick="showComp('video',this)">&#128249; Video</div>
+      <div class="comp-tab" onclick="showComp('photo',this)">&#128247; Photo</div>
     </div>
     <div id="comp-video">
       <table class="comp-table">
         <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
-        <tr><td>1â2 videos</td><td class="comp-eur">â¬14/video</td><td class="comp-gbp">Â£12</td></tr>
-        <tr><td>3â8 videos</td><td class="comp-eur">â¬12/video</td><td class="comp-gbp">Â£10</td></tr>
-        <tr><td>9â15 videos</td><td class="comp-eur">â¬120 pkg</td><td class="comp-gbp">Â£105</td></tr>
-        <tr><td>16â30 videos</td><td class="comp-eur">â¬160 pkg</td><td class="comp-gbp">Â£140</td></tr>
-        <tr><td>30+ videos</td><td class="comp-eur">â¬200 pkg</td><td class="comp-gbp">Â£175</td></tr>
+        <tr><td>1&#8211;2 videos</td><td class="comp-eur">&#8364;14/video</td><td class="comp-gbp">&#163;12</td></tr>
+        <tr><td>3&#8211;8 videos</td><td class="comp-eur">&#8364;12/video</td><td class="comp-gbp">&#163;10</td></tr>
+        <tr><td>9&#8211;15 videos</td><td class="comp-eur">&#8364;120 pkg</td><td class="comp-gbp">&#163;105</td></tr>
+        <tr><td>16&#8211;30 videos</td><td class="comp-eur">&#8364;160 pkg</td><td class="comp-gbp">&#163;140</td></tr>
+        <tr><td>30+ videos</td><td class="comp-eur">&#8364;200 pkg</td><td class="comp-gbp">&#163;175</td></tr>
       </table>
     </div>
     <div id="comp-photo" style="display:none">
       <table class="comp-table">
         <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
-        <tr><td>1â2 photos</td><td class="comp-eur">â¬4/photo</td><td class="comp-gbp">Â£3.50</td></tr>
-        <tr><td>3â5 photos</td><td class="comp-eur">â¬3.50/photo</td><td class="comp-gbp">Â£3</td></tr>
-        <tr><td>6â10 photos</td><td class="comp-eur">â¬2.50/photo</td><td class="comp-gbp">Â£2</td></tr>
-        <tr><td>11â20 photos</td><td class="comp-eur">â¬2/photo</td><td class="comp-gbp">Â£1.70</td></tr>
-        <tr><td>21â33 photos</td><td class="comp-eur">â¬1.90/photo</td><td class="comp-gbp">Â£1.65</td></tr>
-        <tr><td>34+ photos</td><td class="comp-eur">â¬50 pkg</td><td class="comp-gbp">Â£42.50</td></tr>
+        <tr><td>1&#8211;2 photos</td><td class="comp-eur">&#8364;4/photo</td><td class="comp-gbp">&#163;3.50</td></tr>
+        <tr><td>3&#8211;5 photos</td><td class="comp-eur">&#8364;3.50/photo</td><td class="comp-gbp">&#163;3</td></tr>
+        <tr><td>6&#8211;10 photos</td><td class="comp-eur">&#8364;2.50/photo</td><td class="comp-gbp">&#163;2</td></tr>
+        <tr><td>11&#8211;20 photos</td><td class="comp-eur">&#8364;2/photo</td><td class="comp-gbp">&#163;1.70</td></tr>
+        <tr><td>21&#8211;33 photos</td><td class="comp-eur">&#8364;1.90/photo</td><td class="comp-gbp">&#163;1.65</td></tr>
+        <tr><td>34+ photos</td><td class="comp-eur">&#8364;50 pkg</td><td class="comp-gbp">&#163;42.50</td></tr>
       </table>
     </div>
   </div>
@@ -186,6 +186,7 @@
   const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
   const COLOR = { blue:'#7ac3dd', yellow:'#fcd988', pink:'#f79f9d', green:'#a9d380' };
 
+  // Legend toggle state
   const showTypes = { green:true, blue:true, yellow:true, pink:true };
 
   function toggleLegend(type) {
@@ -202,13 +203,13 @@
   function hotelColor(b){ b=parseFloat(b)||0; return b<=0?'blue':b<=100?'yellow':'pink'; }
   function makeCircle(color,size){
     return L.divIcon({className:'',
-      html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+COLOR[color]+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px 7+COLOR[color]+'88;"></div>',
+      html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+COLOR[color]+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px '+COLOR[color]+'88;"></div>',
       iconSize:[size,size],iconAnchor:[size/2,size/2]});
   }
 
   const map = L.map('map',{zoomControl:true}).setView([48,10],4);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    {attribution:'&copy; OSM &copy; CARTO',subdomains:'~abcd',maxZoom:19}).addTo(map);
+    {attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
 
   const hotelCluster = L.markerClusterGroup({chunkedLoading:true});
   const pgcLayer = L.layerGroup();
@@ -222,7 +223,7 @@
   function updateCount(shownHotels) {
     const h = (shownHotels !== undefined) ? shownHotels : allHotelMarkers.filter(i => hotelCluster.hasLayer(i.marker)).length;
     const p = showTypes.green ? pgcCount : 0;
-    document.getElementById('point-count').textContent = h+' hotel'+(h!==1?'s':'')+' Â· '+p+' destination'+(p!==1?'s':'');
+    document.getElementById('point-count').textContent = h+' hotel'+(h!==1?'s':'')+' \u00B7 '+p+' destination'+(p!==1?'s':'');
   }
 
   function applyFilters(){
@@ -274,7 +275,7 @@
             if(isNaN(lat)||isNaN(lng))return;
             const name=(row['Name']||'').trim();
             const loc=(row['Location']||row['City']||'').trim();
-            const budgetRaw=row['Budget Extra (â¬)']||row['Budget Extra']||0;
+            const budgetRaw=row['Budget Extra (\u20AC)']||row['Budget Extra']||0;
             const colorType=hotelColor(budgetRaw);
             const link=(row['Deal Link']||row['Link']||'').trim();
             const prev=(row['Link Preview']||'').trim();
@@ -283,15 +284,15 @@
             const dateAdded=(row['Date Added']||row['DateAdded']||'').trim();
 
             let tags='';
-            if(family) tags+='<span class="popup-tag popup-family">ð¨âð©âð§ Family</span>';
-            if(season&&season!=='all') tags+='<span class="popup-tag popup-season">'+(season==='summer'?'âï¸ Summer':'âï¸ Winter')+'</span>';
+            if(family) tags+='<span class="popup-tag popup-family">\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67 Family</span>';
+            if(season&&season!=='all') tags+='<span class="popup-tag popup-season">'+(season==='summer'?'\u2600\uFE0F Summer':'\u2744\uFE0F Winter')+'</span>';
 
             let p='<b>'+name+'</b>';
             if(loc) p+='<br>'+loc;
             if(tags) p+='<br>'+tags;
             if(prev) p+='<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;" onerror="this.style.display=\'none\'" />';
-            if(link) p+='<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal â</a>';
-            p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload â</a>';
+            if(link) p+='<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal \u2192</a>';
+            p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload \u2197</a>';
 
             const marker=L.marker([lat,lng],{icon:makeCircle(colorType,12)}).bindPopup(p);
             allHotelMarkers.push({marker,family,season,dateAdded,colorType});
@@ -318,9 +319,9 @@
             const uplink=(row['Upload Link']||row['Upload']||'').trim();
             let p='<b>'+dest+'</b>';
             if(loc) p+='<br>'+loc;
-            if(dl)  p+='<br><span class="popup-tag popup-deadline">ð Deadline: '+dl+'</span>';
+            if(dl)  p+='<br><span class="popup-tag popup-deadline">\uD83D\uDCC5 Deadline: '+dl+'</span>';
             if(notes) p+='<br><small style="color:#aaa;">'+notes+'</small>';
-            p+='<br><a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">Upload â</a>';
+            p+='<br><a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">Upload \u2197</a>';
             const marker=L.marker([lat,lng],{icon:makeCircle('green',14)}).bindPopup(p);
             allPgcMarkers.push(marker);
             pgcLayer.addLayer(marker);
@@ -334,7 +335,7 @@
   }
 
   async function loadAll(){
-    showStatus('Loading map dataâ¦','rgba(122,195,221,0.15)');
+    showStatus('Loading map data\u2026','rgba(122,195,221,0.15)');
     await Promise.all([loadHotels(),loadPGCOpenings()]);
     applyFilters();
     hideStatus();
