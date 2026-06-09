@@ -15,7 +15,7 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     html,body { height:100%; background:#141420; font-family:'Open Sans','Segoe UI',sans-serif; color:#ccc; }
 
-    /* ââ Titlebar ââ */
+    /* ── Titlebar ── */
     #titlebar { position:fixed; top:0; left:0; right:0; height:46px; z-index:1000;
       background:rgba(14,14,28,0.97); border-bottom:1px solid rgba(255,255,255,0.08);
       display:flex; align-items:center; gap:12px; padding:0 18px; }
@@ -23,18 +23,18 @@
     #titlebar .sub { font-size:12px; color:#555; white-space:nowrap; }
     #point-count { margin-left:auto; font-size:13px; font-weight:600; color:#7ac3dd; white-space:nowrap; }
 
-    /* ââ Panel toggle (mobile only) ââ */
+    /* ── Panel toggle (mobile only) ── */
     #panel-toggle { display:none; position:fixed; bottom:20px; right:16px; z-index:1100;
       background:#7ac3dd; color:#141420; border:none; border-radius:50%; width:44px; height:44px;
       font-size:20px; cursor:pointer; box-shadow:0 2px 12px rgba(0,0,0,.5); align-items:center; justify-content:center; }
 
-    /* ââ Desktop layout ââ */
+    /* ── Desktop layout ── */
     #map { position:fixed; top:46px; left:0; right:310px; bottom:0; }
     #panel { position:fixed; top:46px; right:0; bottom:0; width:310px; z-index:999;
       background:rgba(12,12,24,0.97); border-left:1px solid rgba(255,255,255,0.07);
       overflow-y:auto; display:flex; flex-direction:column; }
 
-    /* ââ Mobile layout ââ */
+    /* ── Mobile layout ── */
     @media (max-width: 768px) {
       #map { position:fixed; top:46px; left:0; right:0; bottom:220px; }
       #panel { position:fixed; left:0; right:0; bottom:0; top:auto; width:100%;
@@ -51,7 +51,7 @@
     .p-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
       color:#444; margin-bottom:10px; }
 
-    /* Legend &#8212; clickable toggles */
+    /* Legend — clickable toggles */
     .leg-row { display:flex; align-items:center; gap:9px; margin-bottom:7px;
       cursor:pointer; user-select:none; border-radius:5px; padding:3px 5px; margin-left:-5px;
       transition:opacity .15s; }
@@ -74,20 +74,6 @@
       padding:3px 10px; border-radius:4px; cursor:pointer; margin-top:6px; width:100%; }
     .btn-reset:hover { color:#aaa; border-color:rgba(255,255,255,0.25); }
 
-    /* Compensation */
-    .comp-tabs { display:flex; gap:6px; margin-bottom:10px; }
-    .comp-tab { flex:1; font-size:11px; font-weight:600; padding:5px 6px; border-radius:5px;
-      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
-      color:#666; cursor:pointer; text-align:center; }
-    .comp-tab.active { background:rgba(122,195,221,0.15); border-color:#7ac3dd; color:#7ac3dd; }
-    .comp-table { width:100%; border-collapse:collapse; font-size:11px; }
-    .comp-table th { text-align:left; color:#555; font-weight:600; font-size:10px;
-      text-transform:uppercase; letter-spacing:.05em; padding:3px 0 6px; }
-    .comp-table td { padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:#bbb; }
-    .comp-table td:last-child { text-align:right; color:#7ac3dd; font-weight:600; }
-    .comp-eur { color:#7ac3dd !important; }
-    .comp-gbp { color:#555 !important; font-size:10px; font-weight:400 !important; }
-
     /* Popups */
     .leaflet-popup-content-wrapper { background:rgba(18,18,34,0.97); border:1px solid rgba(255,255,255,0.13);
       border-radius:10px; color:#eee; font-family:'Open Sans',sans-serif; box-shadow:0 4px 20px rgba(0,0,0,.6); }
@@ -96,12 +82,13 @@
     .leaflet-popup-content b { color:#fff; font-size:14px; display:block; margin-bottom:2px; }
     .leaflet-popup-content a.view-deal { color:#7ac3dd; text-decoration:none; font-size:12px; }
     .leaflet-popup-content a.view-deal:hover { text-decoration:underline; }
+    .popup-img { margin-top:6px; width:100%; border-radius:4px; display:block; }
     .popup-tag { display:inline-block; margin:2px 3px 2px 0; padding:2px 8px;
       border-radius:4px; font-size:10px; font-weight:700; }
     .popup-deadline { background:#a9d380; color:#141420; }
     .popup-family   { background:#fcd988; color:#141420; }
     .popup-season   { background:rgba(255,255,255,0.12); color:#ccc; }
-    /* Upload button â prominent CTA */
+    /* Upload button — prominent CTA */
     .popup-upload { display:block; margin-top:10px; padding:8px 14px; text-align:center;
       border-radius:6px; font-size:12px; font-weight:700; letter-spacing:.03em;
       background:#ff6b35; color:#fff !important; text-decoration:none !important;
@@ -136,15 +123,7 @@
     </div>
     <div class="leg-row" id="leg-blue" onclick="toggleLegend('blue')">
       <div class="leg-dot" style="background:#7ac3dd"></div>
-      <span class="leg-label">(S)PGC Hotel &#8212; no budget</span>
-    </div>
-    <div class="leg-row" id="leg-yellow" onclick="toggleLegend('yellow')">
-      <div class="leg-dot" style="background:#fcd988"></div>
-      <span class="leg-label">(S)PGC Hotel &#8212; low budget</span>
-    </div>
-    <div class="leg-row" id="leg-pink" onclick="toggleLegend('pink')">
-      <div class="leg-dot" style="background:#f79f9d"></div>
-      <span class="leg-label">(S)PGC Hotel &#8212; high budget</span>
+      <span class="leg-label">(S)PGC Hotel</span>
     </div>
     <div class="leg-hint">Click any row to toggle visibility</div>
   </div>
@@ -175,39 +154,14 @@
     </div>
     <button class="btn-reset" onclick="resetAll()">&#8634; Reset all</button>
   </div>
-
-  <!-- Compensation -->
-  <div class="p-section">
-    <div class="p-title">PGC Compensation</div>
-    <div class="comp-tabs">
-      <div class="comp-tab active" onclick="showComp('video',this)">&#128249; Video</div>
-      <div class="comp-tab" onclick="showComp('photo',this)">&#128247; Photo</div>
-    </div>
-    <div id="comp-video">
-      <table class="comp-table">
-        <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
-        <tr><td>1&#8211;2 videos</td><td class="comp-eur">&#8364;14/video</td><td class="comp-gbp">&#163;12</td></tr>
-        <tr><td>3&#8211;8 videos</td><td class="comp-eur">&#8364;12/video</td><td class="comp-gbp">&#163;10</td></tr>
-        <tr><td>9&#8211;15 videos</td><td class="comp-eur">&#8364;120 pkg</td><td class="comp-gbp">&#163;105</td></tr>
-        <tr><td>16&#8211;30 videos</td><td class="comp-eur">&#8364;160 pkg</td><td class="comp-gbp">&#163;140</td></tr>
-        <tr><td>30+ videos</td><td class="comp-eur">&#8364;200 pkg</td><td class="comp-gbp">&#163;175</td></tr>
-      </table>
-    </div>
-    <div id="comp-photo" style="display:none">
-      <table class="comp-table">
-        <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
-        <tr><td>1&#8211;2 photos</td><td class="comp-eur">&#8364;4/photo</td><td class="comp-gbp">&#163;3.50</td></tr>
-        <tr><td>3&#8211;5 photos</td><td class="comp-eur">&#8364;3.50/photo</td><td class="comp-gbp">&#163;3</td></tr>
-        <tr><td>6&#8211;10 photos</td><td class="comp-eur">&#8364;2.50/photo</td><td class="comp-gbp">&#163;2</td></tr>
-        <tr><td>11&#8211;20 photos</td><td class="comp-eur">&#8364;2/photo</td><td class="comp-gbp">&#163;1.70</td></tr>
-        <tr><td>21&#8211;33 photos</td><td class="comp-eur">&#8364;1.90/photo</td><td class="comp-gbp">&#163;1.65</td></tr>
-        <tr><td>34+ photos</td><td class="comp-eur">&#8364;50 pkg</td><td class="comp-gbp">&#163;42.50</td></tr>
-      </table>
-    </div>
-  </div>
 </div>
 
 <script>
+  // ════════════════════════════════════════════════════════════════
+  // CONFIG — audience switches. THIS IS THE COLLEAGUES (company) FILE:
+  // budget tiers and PGC compensation rates are NOT rendered.
+  // ════════════════════════════════════════════════════════════════
+  const SHOW_BUDGET = false;        // false = all hotels one color, no budget legend
   const HOTELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=0&single=true&output=csv';
   const PGC_URL    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=1637414386&single=true&output=csv';
   const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
@@ -216,9 +170,41 @@
   // Legend toggle state
   const showTypes = { green:true, blue:true, yellow:true, pink:true };
 
+  // Robust header lookup: sheet headers sometimes carry stray spaces/tabs
+  function getCol(row, name) {
+    if (row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') return String(row[name]).trim();
+    const want = name.toLowerCase();
+    for (const k in row) {
+      const kk = k.replace(/\s+/g,' ').trim().toLowerCase();
+      if (kk === want && row[k] != null && String(row[k]).trim() !== '') return String(row[k]).trim();
+    }
+    return '';
+  }
+  // Fuzzy: first header CONTAINING the fragment with a non-empty value
+  function getColLike(row, fragment) {
+    const want = fragment.toLowerCase();
+    for (const k in row) {
+      if (k.toLowerCase().indexOf(want) > -1 && row[k] != null && String(row[k]).trim() !== '') return String(row[k]).trim();
+    }
+    return '';
+  }
+  // Like getColLike but only accepts URL values (the sheet has a malformed
+  // "Budget Extra (€) / Link Preview" merged header that must not win)
+  function getUrlColLike(row, fragment) {
+    const want = fragment.toLowerCase();
+    for (const k in row) {
+      if (k.toLowerCase().indexOf(want) > -1 && row[k] != null) {
+        const v = String(row[k]).trim();
+        if (/^https?:\/\//i.test(v)) return v;
+      }
+    }
+    return '';
+  }
+
   function toggleLegend(type) {
     showTypes[type] = !showTypes[type];
-    document.getElementById('leg-'+type).classList.toggle('leg-off', !showTypes[type]);
+    const el = document.getElementById('leg-'+type);
+    if (el) el.classList.toggle('leg-off', !showTypes[type]);
     if (type === 'green') {
       allPgcMarkers.forEach(function(m){ showTypes.green ? pgcLayer.addLayer(m) : pgcLayer.removeLayer(m); });
       updateCount();
@@ -227,7 +213,10 @@
     }
   }
 
-  function hotelColor(b){ b=parseFloat(b)||0; return b<=0?'blue':b<=100?'yellow':'pink'; }
+  function hotelColor(b){
+    if (!SHOW_BUDGET) return 'blue';
+    b=parseFloat(b)||0; return b<=0?'blue':b<=100?'yellow':'pink';
+  }
   function makeCircle(color,size){
     return L.divIcon({className:'',
       html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+COLOR[color]+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px '+COLOR[color]+'88;"></div>',
@@ -250,7 +239,7 @@
   function updateCount(shownHotels) {
     const h = (shownHotels !== undefined) ? shownHotels : allHotelMarkers.filter(i => hotelCluster.hasLayer(i.marker)).length;
     const p = showTypes.green ? pgcCount : 0;
-    document.getElementById('point-count').textContent = h+' hotel'+(h!==1?'s':'')+' \u00B7 '+p+' destination'+(p!==1?'s':'');
+    document.getElementById('point-count').textContent = h+' hotel'+(h!==1?'s':'')+' · '+p+' destination'+(p!==1?'s':'');
   }
 
   function applyFilters(){
@@ -280,17 +269,11 @@
     document.getElementById('f-recent').value='';
     ['green','blue','yellow','pink'].forEach(function(t){
       showTypes[t]=true;
-      document.getElementById('leg-'+t).classList.remove('leg-off');
+      const el=document.getElementById('leg-'+t);
+      if (el) el.classList.remove('leg-off');
     });
     allPgcMarkers.forEach(function(m){ pgcLayer.addLayer(m); });
     applyFilters();
-  }
-
-  function showComp(type,el){
-    document.getElementById('comp-video').style.display=type==='video'?'block':'none';
-    document.getElementById('comp-photo').style.display=type==='photo'?'block':'none';
-    document.querySelectorAll('.comp-tab').forEach(function(t){t.classList.remove('active');});
-    el.classList.add('active');
   }
 
   function loadHotels(){
@@ -300,26 +283,27 @@
           r.data.forEach(function(row){
             const lat=parseFloat(row['Latitude']),lng=parseFloat(row['Longitude']);
             if(isNaN(lat)||isNaN(lng))return;
-            const name=(row['Name']||'').trim();
-            const loc=(row['Location']||row['City']||'').trim();
-            const budgetRaw=row['Budget Extra (\u20AC)']||row['Budget Extra']||0;
+            const name=getCol(row,'Name');
+            const loc=getCol(row,'Location')||getCol(row,'City');
+            const budgetRaw = SHOW_BUDGET ? getColLike(row,'budget extra') : 0;
             const colorType=hotelColor(budgetRaw);
-            const link=(row['Deal Link']||row['Link']||'').trim();
-            const prev=(row['Link Preview']||'').trim();
+            const link=getCol(row,'Deal Link')||getCol(row,'Link');
+            // Image column (filled by the Apps Script) first, then Link Preview as fallback
+            const img=getCol(row,'Image')||getUrlColLike(row,'preview');
             const family=/yes|true|1/i.test(String(row['Family']||''));
-            const season=(row['Season']||'').toLowerCase().trim()||'all';
-            const dateAdded=(row['Date Added']||row['DateAdded']||'').trim();
+            const season=(getCol(row,'Season')||'').toLowerCase()||'all';
+            const dateAdded=getCol(row,'Date Added')||getCol(row,'DateAdded');
 
             let tags='';
-            if(family) tags+='<span class="popup-tag popup-family">\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67 Family</span>';
-            if(season&&season!=='all') tags+='<span class="popup-tag popup-season">'+(season==='summer'?'\u2600\uFE0F Summer':'\u2744\uFE0F Winter')+'</span>';
+            if(family) tags+='<span class="popup-tag popup-family">👨‍👩‍👧 Family</span>';
+            if(season&&season!=='all') tags+='<span class="popup-tag popup-season">'+(season==='summer'?'☀️ Summer':'❄️ Winter')+'</span>';
 
             let p='<b>'+name+'</b>';
             if(loc) p+='<br>'+loc;
             if(tags) p+='<br>'+tags;
-            if(prev) p+='<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;" onerror="this.style.display=\'none\'" />';
-            if(link) p+='<br><a class="view-deal" href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal \u2192</a>';
-            p+='<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">\u2197 Upload to Canto</a>';
+            if(img && /^https?:\/\//i.test(img)) p+='<img class="popup-img" src="'+img+'" loading="lazy" onerror="this.style.display=\'none\'" />';
+            if(link) p+='<br><a class="view-deal" href="'+(link.indexOf('http')===0?link:'https://'+link)+'" target="_blank">View Deal →</a>';
+            p+='<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">↗ Upload to Canto</a>';
 
             const marker=L.marker([lat,lng],{icon:makeCircle(colorType,12)}).bindPopup(p);
             allHotelMarkers.push({marker,family,season,dateAdded,colorType});
@@ -346,9 +330,9 @@
             const uplink=(row['Upload Link']||row['Upload']||'').trim();
             let p='<b>'+dest+'</b>';
             if(loc) p+='<br>'+loc;
-            if(dl)  p+='<br><span class="popup-tag popup-deadline">\uD83D\uDCC5 Deadline: '+dl+'</span>';
+            if(dl)  p+='<br><span class="popup-tag popup-deadline">📅 Deadline: '+dl+'</span>';
             if(notes) p+='<br><small style="color:#aaa;">'+notes+'</small>';
-            p+='<a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">\u2197 Upload to Canto</a>';
+            p+='<a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">↗ Upload to Canto</a>';
             const marker=L.marker([lat,lng],{icon:makeCircle('green',14)}).bindPopup(p);
             allPgcMarkers.push(marker);
             pgcLayer.addLayer(marker);
@@ -365,7 +349,7 @@
     const panel = document.getElementById('panel');
     const btn = document.getElementById('panel-toggle');
     panel.classList.toggle('panel-hidden');
-    btn.textContent = panel.classList.contains('panel-hidden') ? '\u2630' : '\u2715';
+    btn.textContent = panel.classList.contains('panel-hidden') ? '☰' : '✕';
     setTimeout(function(){ map.invalidateSize(); }, 320);
   }
 
@@ -381,10 +365,29 @@
     }
   });
 
+  // ── Width/zoom fix for Google Sites iframes ──────────────────────
+  // Sites renders the iframe before it has its final size, so Leaflet
+  // measures a wrong (small/zero) container → tiles misplaced, wrong
+  // zoom, dead space. Re-measure aggressively after load, then fit
+  // the view to the actual data.
+  function fitToData(){
+    map.invalidateSize();
+    let b = null;
+    if (allHotelMarkers.length) b = hotelCluster.getBounds();
+    if (allPgcMarkers.length) {
+      const pb = L.featureGroup(allPgcMarkers).getBounds();
+      b = b && b.isValid() ? b.extend(pb) : pb;
+    }
+    if (b && b.isValid()) map.fitBounds(b, { padding:[40,40], maxZoom:7 });
+  }
+  [250, 800, 2000].forEach(function(ms){ setTimeout(function(){ map.invalidateSize(); }, ms); });
+  window.addEventListener('load', function(){ setTimeout(function(){ map.invalidateSize(); }, 100); });
+
   async function loadAll(){
-    showStatus('Loading map data\u2026','rgba(122,195,221,0.15)');
+    showStatus('Loading map data…','rgba(122,195,221,0.15)');
     await Promise.all([loadHotels(),loadPGCOpenings()]);
     applyFilters();
+    fitToData();
     hideStatus();
   }
   loadAll();
