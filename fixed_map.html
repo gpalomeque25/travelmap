@@ -14,16 +14,39 @@
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     html,body { height:100%; background:#141420; font-family:'Open Sans','Segoe UI',sans-serif; color:#ccc; }
-    #titlebar { position:fixed; top:0; left:0; right:0; height:44px; z-index:1000;
+
+    /* ââ Titlebar ââ */
+    #titlebar { position:fixed; top:0; left:0; right:0; height:46px; z-index:1000;
       background:rgba(14,14,28,0.97); border-bottom:1px solid rgba(255,255,255,0.08);
       display:flex; align-items:center; gap:12px; padding:0 18px; }
     #titlebar h1 { font-size:15px; font-weight:700; color:#fff; white-space:nowrap; }
     #titlebar .sub { font-size:12px; color:#555; white-space:nowrap; }
     #point-count { margin-left:auto; font-size:13px; font-weight:600; color:#7ac3dd; white-space:nowrap; }
-    #map { position:absolute; top:44px; left:0; right:290px; bottom:0; }
-    #panel { position:fixed; top:44px; right:0; bottom:0; width:290px; z-index:999;
+
+    /* ââ Panel toggle (mobile only) ââ */
+    #panel-toggle { display:none; position:fixed; bottom:20px; right:16px; z-index:1100;
+      background:#7ac3dd; color:#141420; border:none; border-radius:50%; width:44px; height:44px;
+      font-size:20px; cursor:pointer; box-shadow:0 2px 12px rgba(0,0,0,.5); align-items:center; justify-content:center; }
+
+    /* ââ Desktop layout ââ */
+    #map { position:fixed; top:46px; left:0; right:310px; bottom:0; }
+    #panel { position:fixed; top:46px; right:0; bottom:0; width:310px; z-index:999;
       background:rgba(12,12,24,0.97); border-left:1px solid rgba(255,255,255,0.07);
       overflow-y:auto; display:flex; flex-direction:column; }
+
+    /* ââ Mobile layout ââ */
+    @media (max-width: 768px) {
+      #map { position:fixed; top:46px; left:0; right:0; bottom:220px; }
+      #panel { position:fixed; left:0; right:0; bottom:0; top:auto; width:100%;
+        height:220px; border-left:none; border-top:2px solid rgba(122,195,221,0.3);
+        box-shadow:0 -4px 20px rgba(0,0,0,.5); transition:transform .3s ease; overflow-y:auto; }
+      #panel.panel-hidden { transform:translateY(calc(100% - 32px)); }
+      #panel.panel-hidden + #panel-toggle { bottom: 40px; }
+      #panel-toggle { display:flex; }
+      #titlebar .sub { display:none; }
+      #titlebar h1 { font-size:14px; }
+      #point-count { font-size:12px; }
+    }
     .p-section { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
     .p-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
       color:#444; margin-bottom:10px; }
@@ -66,21 +89,24 @@
     .comp-gbp { color:#555 !important; font-size:10px; font-weight:400 !important; }
 
     /* Popups */
-    .leaflet-popup-content-wrapper { background:rgba(18,18,32,0.95); border:1px solid rgba(255,255,255,0.1);
-      border-radius:8px; color:#eee; font-family:'Open Sans',sans-serif; }
-    .leaflet-popup-tip { background:rgba(18,18,32,0.95); }
-    .leaflet-popup-content { font-size:13px; line-height:1.5; min-width:155px; }
-    .leaflet-popup-content b { color:#fff; font-size:14px; }
-    .leaflet-popup-content a { color:#7ac3dd; }
-    .popup-tag { display:inline-block; margin:2px 3px 2px 0; padding:1px 7px;
-      border-radius:3px; font-size:10px; font-weight:600; }
+    .leaflet-popup-content-wrapper { background:rgba(18,18,34,0.97); border:1px solid rgba(255,255,255,0.13);
+      border-radius:10px; color:#eee; font-family:'Open Sans',sans-serif; box-shadow:0 4px 20px rgba(0,0,0,.6); }
+    .leaflet-popup-tip { background:rgba(18,18,34,0.97); }
+    .leaflet-popup-content { font-size:13px; line-height:1.6; min-width:175px; padding:2px 0; }
+    .leaflet-popup-content b { color:#fff; font-size:14px; display:block; margin-bottom:2px; }
+    .leaflet-popup-content a.view-deal { color:#7ac3dd; text-decoration:none; font-size:12px; }
+    .leaflet-popup-content a.view-deal:hover { text-decoration:underline; }
+    .popup-tag { display:inline-block; margin:2px 3px 2px 0; padding:2px 8px;
+      border-radius:4px; font-size:10px; font-weight:700; }
     .popup-deadline { background:#a9d380; color:#141420; }
     .popup-family   { background:#fcd988; color:#141420; }
     .popup-season   { background:rgba(255,255,255,0.12); color:#ccc; }
-    .popup-upload { display:inline-block; margin-top:8px; padding:5px 12px;
-      border-radius:5px; font-size:12px; font-weight:700; background:#7ac3dd;
-      color:#141420; text-decoration:none; }
-    .popup-upload:hover { background:#9dd4e6; }
+    /* Upload button â prominent CTA */
+    .popup-upload { display:block; margin-top:10px; padding:8px 14px; text-align:center;
+      border-radius:6px; font-size:12px; font-weight:700; letter-spacing:.03em;
+      background:#ff6b35; color:#fff !important; text-decoration:none !important;
+      border:none; transition:background .15s; }
+    .popup-upload:hover { background:#ff8555; color:#fff !important; }
     .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div
       { background-color:#7ac3dd; color:#141420; font-weight:700; }
     .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large
@@ -98,6 +124,7 @@
 </div>
 <div id="status-msg"></div>
 <div id="map"></div>
+<button id="panel-toggle" title="Toggle panel" onclick="togglePanel()">&#9776;</button>
 
 <div id="panel">
   <!-- Legend (clickable filters) -->
@@ -207,7 +234,7 @@
       iconSize:[size,size],iconAnchor:[size/2,size/2]});
   }
 
-  const map = L.map('map',{zoomControl:true}).setView([48,10],4);
+  const map = L.map('map',{zoomControl:true}).setView([47,12],5);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     {attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
 
@@ -291,8 +318,8 @@
             if(loc) p+='<br>'+loc;
             if(tags) p+='<br>'+tags;
             if(prev) p+='<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;" onerror="this.style.display=\'none\'" />';
-            if(link) p+='<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal \u2192</a>';
-            p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload \u2197</a>';
+            if(link) p+='<br><a class="view-deal" href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal \u2192</a>';
+            p+='<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">\u2197 Upload to Canto</a>';
 
             const marker=L.marker([lat,lng],{icon:makeCircle(colorType,12)}).bindPopup(p);
             allHotelMarkers.push({marker,family,season,dateAdded,colorType});
@@ -321,7 +348,7 @@
             if(loc) p+='<br>'+loc;
             if(dl)  p+='<br><span class="popup-tag popup-deadline">\uD83D\uDCC5 Deadline: '+dl+'</span>';
             if(notes) p+='<br><small style="color:#aaa;">'+notes+'</small>';
-            p+='<br><a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">Upload \u2197</a>';
+            p+='<a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">\u2197 Upload to Canto</a>';
             const marker=L.marker([lat,lng],{icon:makeCircle('green',14)}).bindPopup(p);
             allPgcMarkers.push(marker);
             pgcLayer.addLayer(marker);
@@ -333,6 +360,26 @@
       });
     });
   }
+
+  function togglePanel(){
+    const panel = document.getElementById('panel');
+    const btn = document.getElementById('panel-toggle');
+    panel.classList.toggle('panel-hidden');
+    btn.textContent = panel.classList.contains('panel-hidden') ? '\u2630' : '\u2715';
+    setTimeout(function(){ map.invalidateSize(); }, 320);
+  }
+
+  // On mobile, start with panel partially hidden so map is usable
+  if (window.innerWidth <= 768) {
+    document.getElementById('panel').classList.add('panel-hidden');
+  }
+
+  window.addEventListener('resize', function(){
+    map.invalidateSize();
+    if (window.innerWidth > 768) {
+      document.getElementById('panel').classList.remove('panel-hidden');
+    }
+  });
 
   async function loadAll(){
     showStatus('Loading map data\u2026','rgba(122,195,221,0.15)');
