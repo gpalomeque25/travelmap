@@ -23,14 +23,23 @@
     #map { position:absolute; top:44px; left:0; right:290px; bottom:0; }
     #panel { position:fixed; top:44px; right:0; bottom:0; width:290px; z-index:999;
       background:rgba(12,12,24,0.97); border-left:1px solid rgba(255,255,255,0.07);
-      overflow-y:auto; display:flex; flex-direction:column; gap:0; }
+      overflow-y:auto; display:flex; flex-direction:column; }
     .p-section { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
     .p-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
       color:#444; margin-bottom:10px; }
-    .leg-row { display:flex; align-items:center; gap:9px; margin-bottom:7px; }
+
+    /* Legend â clickable toggles */
+    .leg-row { display:flex; align-items:center; gap:9px; margin-bottom:7px;
+      cursor:pointer; user-select:none; border-radius:5px; padding:3px 5px; margin-left:-5px;
+      transition:opacity .15s; }
     .leg-row:last-child { margin-bottom:0; }
+    .leg-row:hover { background:rgba(255,255,255,0.04); }
+    .leg-row.leg-off { opacity:.3; }
     .leg-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; border:2px solid rgba(255,255,255,0.4); }
     .leg-label { font-size:12px; color:#bbb; }
+    .leg-hint { font-size:10px; color:#444; margin-top:6px; }
+
+    /* Filters */
     .f-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
     .f-row:last-child { margin-bottom:0; }
     .f-label { font-size:12px; color:#aaa; }
@@ -41,6 +50,8 @@
     .btn-reset { font-size:11px; color:#555; background:none; border:1px solid rgba(255,255,255,0.1);
       padding:3px 10px; border-radius:4px; cursor:pointer; margin-top:6px; width:100%; }
     .btn-reset:hover { color:#aaa; border-color:rgba(255,255,255,0.25); }
+
+    /* Compensation */
     .comp-tabs { display:flex; gap:6px; margin-bottom:10px; }
     .comp-tab { flex:1; font-size:11px; font-weight:600; padding:5px 6px; border-radius:5px;
       background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
@@ -53,6 +64,8 @@
     .comp-table td:last-child { text-align:right; color:#7ac3dd; font-weight:600; }
     .comp-eur { color:#7ac3dd !important; }
     .comp-gbp { color:#555 !important; font-size:10px; font-weight:400 !important; }
+
+    /* Popups */
     .leaflet-popup-content-wrapper { background:rgba(18,18,32,0.95); border:1px solid rgba(255,255,255,0.1);
       border-radius:8px; color:#eee; font-family:'Open Sans',sans-serif; }
     .leaflet-popup-tip { background:rgba(18,18,32,0.95); }
@@ -65,9 +78,9 @@
     .popup-family   { background:#fcd988; color:#141420; }
     .popup-season   { background:rgba(255,255,255,0.12); color:#ccc; }
     .popup-upload { display:inline-block; margin-top:8px; padding:5px 12px;
-      border-radius:5px; font-size:12px; font-weight:600; background:#a9d380;
+      border-radius:5px; font-size:12px; font-weight:700; background:#7ac3dd;
       color:#141420; text-decoration:none; }
-    .popup-upload:hover { background:#c2e89f; }
+    .popup-upload:hover { background:#9dd4e6; }
     .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div
       { background-color:#7ac3dd; color:#141420; font-weight:700; }
     .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large
@@ -79,29 +92,49 @@
 </head>
 <body>
 <div id="titlebar">
-  <h1>🏴 PGC Travel Map</h1>
-  <span class="sub">Holiday Pirates · Partner-Generated Content</span>
+  <h1>ð´ PGC Travel Map</h1>
+  <span class="sub">Holiday Pirates Â· Partner-Generated Content</span>
   <span id="point-count"></span>
 </div>
 <div id="status-msg"></div>
 <div id="map"></div>
+
 <div id="panel">
+  <!-- Legend (clickable filters) -->
   <div class="p-section">
-    <div class="p-title">Legend</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#a9d380"></div><span class="leg-label">PGC Destination</span></div>
-    <div class="leg-row"><div class="leg-dot" style="background:#7ac3dd"></div><span class="leg-label">(S)PGC Hotel</span></div>
+    <div class="p-title">Legend â click to show/hide</div>
+    <div class="leg-row" id="leg-green" onclick="toggleLegend('green')">
+      <div class="leg-dot" style="background:#a9d380"></div>
+      <span class="leg-label">PGC Destination</span>
+    </div>
+    <div class="leg-row" id="leg-blue" onclick="toggleLegend('blue')">
+      <div class="leg-dot" style="background:#7ac3dd"></div>
+      <span class="leg-label">(S)PGC Hotel â no budget</span>
+    </div>
+    <div class="leg-row" id="leg-yellow" onclick="toggleLegend('yellow')">
+      <div class="leg-dot" style="background:#fcd988"></div>
+      <span class="leg-label">(S)PGC Hotel â low budget</span>
+    </div>
+    <div class="leg-row" id="leg-pink" onclick="toggleLegend('pink')">
+      <div class="leg-dot" style="background:#f79f9d"></div>
+      <span class="leg-label">(S)PGC Hotel â high budget</span>
+    </div>
+    <div class="leg-hint">Click any row to toggle visibility</div>
   </div>
+
+  <!-- Filters -->
   <div class="p-section">
     <div class="p-title">Filters</div>
     <div class="f-row">
-      <label class="f-toggle"><input type="checkbox" id="f-family" onchange="applyFilters()"><span class="f-label">🏖️ Family deals only</span></label>
+      <label class="f-toggle"><input type="checkbox" id="f-family" onchange="applyFilters()">
+        <span class="f-label">ðï¸ Family deals only</span></label>
     </div>
     <div class="f-row">
       <span class="f-label">Season</span>
       <select class="f-select" id="f-season" onchange="applyFilters()">
         <option value="">All seasons</option>
-        <option value="summer">☀️ Summer</option>
-        <option value="winter">❄️ Winter</option>
+        <option value="summer">âï¸ Summer</option>
+        <option value="winter">âï¸ Winter</option>
       </select>
     </div>
     <div class="f-row">
@@ -113,58 +146,85 @@
         <option value="90">Last 90 days</option>
       </select>
     </div>
-    <button class="btn-reset" onclick="resetFilters()">↺ Reset filters</button>
+    <button class="btn-reset" onclick="resetAll()">âº Reset all</button>
   </div>
+
+  <!-- Compensation -->
   <div class="p-section">
     <div class="p-title">PGC Compensation</div>
     <div class="comp-tabs">
-      <div class="comp-tab active" onclick="showComp('video',this)">📹 Video</div>
-      <div class="comp-tab" onclick="showComp('photo',this)">📷 Photo</div>
+      <div class="comp-tab active" onclick="showComp('video',this)">ð¹ Video</div>
+      <div class="comp-tab" onclick="showComp('photo',this)">ð· Photo</div>
     </div>
     <div id="comp-video">
       <table class="comp-table">
         <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
-        <tr><td>1-2 videos</td><td class="comp-eur">€14/video</td><td class="comp-gbp">£12</td></tr>
-        <tr><td>3-8 videos</td><td class="comp-eur">€12/video</td><td class="comp-gbp">£10</td></tr>
-        <tr><td>9-15 videos</td><td class="comp-eur">€120 pkg</td><td class="comp-gbp">£105</td></tr>
-        <tr><td>16-30 videos</td><td class="comp-eur">€160 pkg</td><td class="comp-gbp">£140</td></tr>
-        <tr><td>30+ videos</td><td class="comp-eur">€200 pkg</td><td class="comp-gbp">£175</td></tr>
+        <tr><td>1â2 videos</td><td class="comp-eur">â¬14/video</td><td class="comp-gbp">Â£12</td></tr>
+        <tr><td>3â8 videos</td><td class="comp-eur">â¬12/video</td><td class="comp-gbp">Â£10</td></tr>
+        <tr><td>9â15 videos</td><td class="comp-eur">â¬120 pkg</td><td class="comp-gbp">Â£105</td></tr>
+        <tr><td>16â30 videos</td><td class="comp-eur">â¬160 pkg</td><td class="comp-gbp">Â£140</td></tr>
+        <tr><td>30+ videos</td><td class="comp-eur">â¬200 pkg</td><td class="comp-gbp">Â£175</td></tr>
       </table>
     </div>
     <div id="comp-photo" style="display:none">
       <table class="comp-table">
         <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
-        <tr><td>1-2 photos</td><td class="comp-eur">€4/photo</td><td class="comp-gbp">£3.50</td></tr>
-        <tr><td>3-5 photos</td><td class="comp-eur">€3.50/photo</td><td class="comp-gbp">£3</td></tr>
-        <tr><td>6-10 photos</td><td class="comp-eur">€2.50/photo</td><td class="comp-gbp">£2</td></tr>
-        <tr><td>11-20 photos</td><td class="comp-eur">€2/photo</td><td class="comp-gbp">£1.70</td></tr>
-        <tr><td>21-33 photos</td><td class="comp-eur">€1.90/photo</td><td class="comp-gbp">£1.65</td></tr>
-        <tr><td>34+ photos</td><td class="comp-eur">€50 pkg</td><td class="comp-gbp">£42.50</td></tr>
+        <tr><td>1â2 photos</td><td class="comp-eur">â¬4/photo</td><td class="comp-gbp">Â£3.50</td></tr>
+        <tr><td>3â5 photos</td><td class="comp-eur">â¬3.50/photo</td><td class="comp-gbp">Â£3</td></tr>
+        <tr><td>6â10 photos</td><td class="comp-eur">â¬2.50/photo</td><td class="comp-gbp">Â£2</td></tr>
+        <tr><td>11â20 photos</td><td class="comp-eur">â¬2/photo</td><td class="comp-gbp">Â£1.70</td></tr>
+        <tr><td>21â33 photos</td><td class="comp-eur">â¬1.90/photo</td><td class="comp-gbp">Â£1.65</td></tr>
+        <tr><td>34+ photos</td><td class="comp-eur">â¬50 pkg</td><td class="comp-gbp">Â£42.50</td></tr>
       </table>
     </div>
   </div>
 </div>
+
 <script>
   const HOTELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=0&single=true&output=csv';
   const PGC_URL    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=1637414386&single=true&output=csv';
   const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
   const COLOR = { blue:'#7ac3dd', yellow:'#fcd988', pink:'#f79f9d', green:'#a9d380' };
-  function hotelFill(b){ b=parseFloat(b)||0; return b<=0?COLOR.blue:b<=100?COLOR.yellow:COLOR.pink; }
+
+  const showTypes = { green:true, blue:true, yellow:true, pink:true };
+
+  function toggleLegend(type) {
+    showTypes[type] = !showTypes[type];
+    document.getElementById('leg-'+type).classList.toggle('leg-off', !showTypes[type]);
+    if (type === 'green') {
+      allPgcMarkers.forEach(function(m){ showTypes.green ? pgcLayer.addLayer(m) : pgcLayer.removeLayer(m); });
+      updateCount();
+    } else {
+      applyFilters();
+    }
+  }
+
+  function hotelColor(b){ b=parseFloat(b)||0; return b<=0?'blue':b<=100?'yellow':'pink'; }
   function makeCircle(color,size){
     return L.divIcon({className:'',
-      html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px '+color+'88;"></div>',
+      html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+COLOR[color]+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px 7+COLOR[color]+'88;"></div>',
       iconSize:[size,size],iconAnchor:[size/2,size/2]});
   }
+
   const map = L.map('map',{zoomControl:true}).setView([48,10],4);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    {attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+    {attribution:'&copy; OSM &copy; CARTO',subdomains:'~abcd',maxZoom:19}).addTo(map);
+
   const hotelCluster = L.markerClusterGroup({chunkedLoading:true});
   const pgcLayer = L.layerGroup();
   map.addLayer(hotelCluster); map.addLayer(pgcLayer);
+
   let allHotelMarkers=[], allPgcMarkers=[], pgcCount=0;
+
   function showStatus(m,bg){const e=document.getElementById('status-msg');e.textContent=m;e.style.background=bg||'rgba(14,14,28,0.9)';e.style.display='block';}
   function hideStatus(){document.getElementById('status-msg').style.display='none';}
-  function updateCount(h,p){document.getElementById('point-count').textContent=h+' hotel'+(h!==1?'s':'')+' · '+p+' destination'+(p!==1?'s':'');}
+
+  function updateCount(shownHotels) {
+    const h = (shownHotels !== undefined) ? shownHotels : allHotelMarkers.filter(i => hotelCluster.hasLayer(i.marker)).length;
+    const p = showTypes.green ? pgcCount : 0;
+    document.getElementById('point-count').textContent = h+' hotel'+(h!==1?'s':'')+' Â· '+p+' destination'+(p!==1?'s':'');
+  }
+
   function applyFilters(){
     hotelCluster.clearLayers();
     const famOnly = document.getElementById('f-family').checked;
@@ -173,29 +233,38 @@
     const now = new Date();
     let shown=0;
     allHotelMarkers.forEach(function(item){
-      let ok=true;
-      if(famOnly && !item.family) ok=false;
-      if(season && item.season && item.season!=='all' && item.season!==season) ok=false;
-      if(recent && item.dateAdded){
+      let ok = true;
+      if (!showTypes[item.colorType]) ok = false;
+      if (ok && famOnly && !item.family) ok = false;
+      if (ok && season && item.season && item.season!=='all' && item.season!==season) ok = false;
+      if (ok && recent && item.dateAdded){
         const d=new Date(item.dateAdded);
         if(!isNaN(d)&&(now-d)/86400000>recent) ok=false;
       }
       if(ok){hotelCluster.addLayer(item.marker);shown++;}
     });
-    updateCount(shown,pgcCount);
+    updateCount(shown);
   }
-  function resetFilters(){
+
+  function resetAll(){
     document.getElementById('f-family').checked=false;
     document.getElementById('f-season').value='';
     document.getElementById('f-recent').value='';
+    ['green','blue','yellow','pink'].forEach(function(t){
+      showTypes[t]=true;
+      document.getElementById('leg-'+t).classList.remove('leg-off');
+    });
+    allPgcMarkers.forEach(function(m){ pgcLayer.addLayer(m); });
     applyFilters();
   }
+
   function showComp(type,el){
     document.getElementById('comp-video').style.display=type==='video'?'block':'none';
     document.getElementById('comp-photo').style.display=type==='photo'?'block':'none';
     document.querySelectorAll('.comp-tab').forEach(function(t){t.classList.remove('active');});
     el.classList.add('active');
   }
+
   function loadHotels(){
     return new Promise(function(resolve){
       Papa.parse(HOTELS_URL,{download:true,header:true,skipEmptyLines:true,
@@ -205,23 +274,27 @@
             if(isNaN(lat)||isNaN(lng))return;
             const name=(row['Name']||'').trim();
             const loc=(row['Location']||row['City']||'').trim();
-            const fill=hotelFill(row['Budget Extra (€)']||row['Budget Extra']||0);
+            const budgetRaw=row['Budget Extra (â¬)']||row['Budget Extra']||0;
+            const colorType=hotelColor(budgetRaw);
             const link=(row['Deal Link']||row['Link']||'').trim();
             const prev=(row['Link Preview']||'').trim();
             const family=/yes|true|1/i.test(String(row['Family']||''));
             const season=(row['Season']||'').toLowerCase().trim()||'all';
             const dateAdded=(row['Date Added']||row['DateAdded']||'').trim();
+
             let tags='';
-            if(family) tags+='<span class="popup-tag popup-family">Family</span>';
-            if(season&&season!=='all') tags+='<span class="popup-tag popup-season">'+(season==='summer'?'Summer':'Winter')+'</span>';
+            if(family) tags+='<span class="popup-tag popup-family">ð¨âð©âð§ Family</span>';
+            if(season&&season!=='all') tags+='<span class="popup-tag popup-season">'+(season==='summer'?'âï¸ Summer':'âï¸ Winter')+'</span>';
+
             let p='<b>'+name+'</b>';
             if(loc) p+='<br>'+loc;
             if(tags) p+='<br>'+tags;
-            if(prev) p+='<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;"/>';
-            if(link) p+='<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal</a>';
-            p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload</a>';
-            const marker=L.marker([lat,lng],{icon:makeCircle(fill,12)}).bindPopup(p);
-            allHotelMarkers.push({marker,family,season,dateAdded});
+            if(prev) p+='<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;" onerror="this.style.display=\'none\'" />';
+            if(link) p+='<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal â</a>';
+            p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload â</a>';
+
+            const marker=L.marker([lat,lng],{icon:makeCircle(colorType,12)}).bindPopup(p);
+            allHotelMarkers.push({marker,family,season,dateAdded,colorType});
           });
           resolve();
         },
@@ -229,6 +302,7 @@
       });
     });
   }
+
   function loadPGCOpenings(){
     return new Promise(function(resolve){
       Papa.parse(PGC_URL,{download:true,header:true,skipEmptyLines:true,
@@ -244,10 +318,10 @@
             const uplink=(row['Upload Link']||row['Upload']||'').trim();
             let p='<b>'+dest+'</b>';
             if(loc) p+='<br>'+loc;
-            if(dl)  p+='<br><span class="popup-tag popup-deadline">Deadline: '+dl+'</span>';
+            if(dl)  p+='<br><span class="popup-tag popup-deadline">ð Deadline: '+dl+'</span>';
             if(notes) p+='<br><small style="color:#aaa;">'+notes+'</small>';
-            p+='<br><a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">Upload</a>';
-            const marker=L.marker([lat,lng],{icon:makeCircle(COLOR.green,14)}).bindPopup(p);
+            p+='<br><a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">Upload â</a>';
+            const marker=L.marker([lat,lng],{icon:makeCircle('green',14)}).bindPopup(p);
             allPgcMarkers.push(marker);
             pgcLayer.addLayer(marker);
             pgcCount++;
@@ -258,8 +332,9 @@
       });
     });
   }
+
   async function loadAll(){
-    showStatus('Loading map data...','rgba(122,195,221,0.15)');
+    showStatus('Loading map dataâ¦','rgba(122,195,221,0.15)');
     await Promise.all([loadHotels(),loadPGCOpenings()]);
     applyFilters();
     hideStatus();
