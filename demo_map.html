@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>PGC Travel Map â DEMO</title>
+  <title>PGC Travel Map &#8212; DEMO</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
@@ -79,24 +79,24 @@
 <div id="titlebar">
   <h1>PGC Travel Map</h1>
   <span class="demo-badge">DEMO</span>
-  <span class="sub">Holiday Pirates Â· Partner-Generated Content</span>
+  <span class="sub">Holiday Pirates &#183; Partner-Generated Content</span>
   <span id="point-count"></span>
 </div>
 <div id="map"></div>
 <div id="panel">
   <div class="p-section">
-    <div class="p-title">Legend â click to show/hide</div>
+    <div class="p-title">Legend &#8212; click to show/hide</div>
     <div class="leg-row" id="leg-green" onclick="toggleLegend('green')">
       <div class="leg-dot" style="background:#a9d380"></div><span class="leg-label">PGC Destination</span>
     </div>
     <div class="leg-row" id="leg-blue" onclick="toggleLegend('blue')">
-      <div class="leg-dot" style="background:#7ac3dd"></div><span class="leg-label">(S)PGC Hotel â no budget</span>
+      <div class="leg-dot" style="background:#7ac3dd"></div><span class="leg-label">(S)PGC Hotel &#8212; no budget</span>
     </div>
     <div class="leg-row" id="leg-yellow" onclick="toggleLegend('yellow')">
-      <div class="leg-dot" style="background:#fcd988"></div><span class="leg-label">(S)PGC Hotel â low budget</span>
+      <div class="leg-dot" style="background:#fcd988"></div><span class="leg-label">(S)PGC Hotel &#8212; low budget</span>
     </div>
     <div class="leg-row" id="leg-pink" onclick="toggleLegend('pink')">
-      <div class="leg-dot" style="background:#f79f9d"></div><span class="leg-label">(S)PGC Hotel â high budget</span>
+      <div class="leg-dot" style="background:#f79f9d"></div><span class="leg-label">(S)PGC Hotel &#8212; high budget</span>
     </div>
     <div class="leg-hint">Click any row to toggle visibility</div>
   </div>
@@ -104,14 +104,14 @@
     <div class="p-title">Filters</div>
     <div class="f-row">
       <label class="f-toggle"><input type="checkbox" id="f-family" onchange="applyFilters()">
-        <span class="f-label">ðï¸ Family deals only</span></label>
+        <span class="f-label">&#127958;&#65039; Family deals only</span></label>
     </div>
     <div class="f-row">
       <span class="f-label">Season</span>
       <select class="f-select" id="f-season" onchange="applyFilters()">
         <option value="">All seasons</option>
-        <option value="summer">âï¸ Summer</option>
-        <option value="winter">âï¸ Winter</option>
+        <option value="summer">&#9728;&#65039; Summer</option>
+        <option value="winter">&#10052;&#65039; Winter</option>
       </select>
     </div>
     <div class="f-row">
@@ -123,33 +123,33 @@
         <option value="90">Last 90 days</option>
       </select>
     </div>
-    <button class="btn-reset" onclick="resetAll()">âº Reset all</button>
+    <button class="btn-reset" onclick="resetAll()">&#8634; Reset all</button>
   </div>
   <div class="p-section">
     <div class="p-title">PGC Compensation</div>
     <div class="comp-tabs">
-      <div class="comp-tab active" onclick="showComp('video',this)">ð¹ Video</div>
-      <div class="comp-tab" onclick="showComp('photo',this)">ð· Photo</div>
+      <div class="comp-tab active" onclick="showComp('video',this)">&#128249; Video</div>
+      <div class="comp-tab" onclick="showComp('photo',this)">&#128247; Photo</div>
     </div>
     <div id="comp-video">
       <table class="comp-table">
         <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
-        <tr><td>1â2 videos</td><td class="comp-eur">â¬14/video</td><td class="comp-gbp">Â£12</td></tr>
-        <tr><td>3â8 videos</td><td class="comp-eur">â¬12/video</td><td class="comp-gbp">Â£10</td></tr>
-        <tr><td>9â15 videos</td><td class="comp-eur">â¬120 pkg</td><td class="comp-gbp">Â£105</td></tr>
-        <tr><td>16â30 videos</td><td class="comp-eur">â¬160 pkg</td><td class="comp-gbp">Â£140</td></tr>
-        <tr><td>30+ videos</td><td class="comp-eur">â¬200 pkg</td><td class="comp-gbp">Â£175</td></tr>
+        <tr><td>1&#8211;2 videos</td><td class="comp-eur">&#8364;14/video</td><td class="comp-gbp">&#163;12</td></tr>
+        <tr><td>3&#8211;8 videos</td><td class="comp-eur">&#8364;12/video</td><td class="comp-gbp">&#163;10</td></tr>
+        <tr><td>9&#8211;15 videos</td><td class="comp-eur">&#8364;120 pkg</td><td class="comp-gbp">&#163;105</td></tr>
+        <tr><td>16&#8211;30 videos</td><td class="comp-eur">&#8364;160 pkg</td><td class="comp-gbp">&#163;140</td></tr>
+        <tr><td>30+ videos</td><td class="comp-eur">&#8364;200 pkg</td><td class="comp-gbp">&#163;175</td></tr>
       </table>
     </div>
     <div id="comp-photo" style="display:none">
       <table class="comp-table">
         <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
-        <tr><td>1â2 photos</td><td class="comp-eur">â¬4/photo</td><td class="comp-gbp">Â£3.50</td></tr>
-        <tr><td>3â5 photos</td><td class="comp-eur">â¬3.50/photo</td><td class="comp-gbp">Â£3</td></tr>
-        <tr><td>6â10 photos</td><td class="comp-eur">â¬2.50/photo</td><td class="comp-gbp">Â£2</td></tr>
-        <tr><td>11â20 photos</td><td class="comp-eur">â¬2/photo</td><td class="comp-gbp">Â£1.70</td></tr>
-        <tr><td>21â33 photos</td><td class="comp-eur">â¬1.90/photo</td><td class="comp-gbp">Â£1.65</td></tr>
-        <tr><td>34+ photos</td><td class="comp-eur">â¬50 pkg</td><td class="comp-gbp">Â£42.50</td></tr>
+        <tr><td>1&#8211;2 photos</td><td class="comp-eur">&#8364;4/photo</td><td class="comp-gbp">&#163;3.50</td></tr>
+        <tr><td>3&#8211;5 photos</td><td class="comp-eur">&#8364;3.50/photo</td><td class="comp-gbp">&#163;3</td></tr>
+        <tr><td>6&#8211;10 photos</td><td class="comp-eur">&#8364;2.50/photo</td><td class="comp-gbp">&#163;2</td></tr>
+        <tr><td>11&#8211;20 photos</td><td class="comp-eur">&#8364;2/photo</td><td class="comp-gbp">&#163;1.70</td></tr>
+        <tr><td>21&#8211;33 photos</td><td class="comp-eur">&#8364;1.90/photo</td><td class="comp-gbp">&#163;1.65</td></tr>
+        <tr><td>34+ photos</td><td class="comp-eur">&#8364;50 pkg</td><td class="comp-gbp">&#163;42.50</td></tr>
       </table>
     </div>
   </div>
@@ -161,7 +161,7 @@
   function daysAgo(n){ const d=new Date(now); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
 
   const HOTELS = [
-    { name:'Therme Erding', loc:'Bavaria, Germany', lat:48.289, lng:11.904, budget:0, family:true, season:'all', added:daysAgo(5) },
+    { name:'Therme Erding', loc:'Bavaria, Germany', lat:48.289, lng:11.904, budget:0, family:true, season:'undefined', added:daysAgo(5) },
     { name:'Lopesan Baobab Resort', loc:'Gran Canaria, Spain', lat:27.747, lng:-15.578, budget:50, family:true, season:'summer', added:daysAgo(8) },
     { name:'Hotel Krumers Alpin', loc:'Seefeld, Austria', lat:47.329, lng:11.185, budget:0, family:false, season:'winter', added:daysAgo(12) },
     { name:'Valamar Lacroma Dubrovnik', loc:'Dubrovnik, Croatia', lat:42.642, lng:18.107, budget:120, family:false, season:'summer', added:daysAgo(15) },
@@ -169,7 +169,7 @@
     { name:'Rixos Sungate', loc:'Antalya, Turkey', lat:36.526, lng:30.555, budget:80, family:true, season:'summer', added:daysAgo(22) },
     { name:'Kempinski Berchtesgaden', loc:'Bavaria, Germany', lat:47.630, lng:13.001, budget:0, family:false, season:'winter', added:daysAgo(25) },
     { name:'Gran Melia de Mar', loc:'Mallorca, Spain', lat:39.555, lng:2.631, budget:150, family:false, season:'summer', added:daysAgo(3) },
-    { name:'Falkensteiner Hotel Carinzia', loc:'Carinthia, Austria', lat:46.614, lng:13.823, budget:0, family:true, season:'winter', added:daysAgo(18) },
+    { name:'Falkensteiner Hotel Carinzja', loc:'Carinthia, Austria', lat:46.614, lng:13.823, budget:0, family:true, season:'winter', added:daysAgo(18) },
     { name:'Concorde De Luxe Resort', loc:'Antalya, Turkey', lat:36.888, lng:30.695, budget:90, family:true, season:'summer', added:daysAgo(10) },
     { name:'TUI Blue Adriatic Beach', loc:'Split, Croatia', lat:43.508, lng:16.440, budget:60, family:false, season:'summer', added:daysAgo(28) },
     { name:'Strandhotel Borkum', loc:'Borkum, Germany', lat:53.594, lng:6.685, budget:0, family:true, season:'summer', added:daysAgo(6) },
@@ -179,9 +179,9 @@
   ];
   const DEST = [
     { name:'Saturnia & Taormina', loc:'Italy', lat:42.659, lng:11.589, dl:'10.06.26', notes:'Thermal springs + Sicily coastal content' },
-    { name:'Catalonia Villages', loc:'Spain', lat:41.820, lng:1.530, dl:'10.06.26', notes:'Rural Catalonia â villages & nature' },
+    { name:'Catalonia Villages', loc:'Spain', lat:41.820, lng:1.530, dl:'10.06.26', notes:'Rural Catalonia \u2014 villages & nature' },
     { name:'Thailand', loc:'Southeast Asia', lat:13.736, lng:100.523, dl:'15.06.26', notes:'Beach + cultural experiences' },
-    { name:'Lauterbrunnen', loc:'Switzerland', lat:46.595, lng:7.908, dl:'17.06.26', notes:'Valley of 72 waterfalls â scenic content' }
+    { name:'Lauterbrunnen', loc:'Switzerland', lat:46.595, lng:7.908, dl:'17.06.26', notes:'Valley of 72 waterfalls \u2014 scenic content' }
   ];
 
   function hotelColorType(b){ return b<=0?'blue':b<=100?'yellow':'pink'; }
@@ -204,20 +204,20 @@
   HOTELS.forEach(function(h){
     const colorType = hotelColorType(h.budget);
     let tags='';
-    if(h.family) tags+='<span class="popup-tag popup-family">ð¨âð©âð§ Family</span>';
-    if(h.season&&h.season!=='all') tags+='<span class="popup-tag popup-season">'+(h.season==='summer'?'âï¸ Summer':'âï¸ Winter')+'</span>';
+    if(h.family) tags+='<span class="popup-tag popup-family">\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67 Family</span>';
+    if(h.season&&h.season!=='all') tags+='<span class="popup-tag popup-season">'+(h.season==='summer'?'\u2600\uFE0F Summer':'\u2744\uFE0F Winter')+'</span>';
     let p='<b>'+h.name+'</b><br>'+h.loc;
     if(tags) p+='<br>'+tags;
-    p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload â</a>';
+    p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload \u2197</a>';
     const marker=L.marker([h.lat,h.lng],{icon:makeCircle(colorType,12)}).bindPopup(p);
     allHotelMarkers.push({marker,family:h.family,season:h.season,dateAdded:h.added,colorType});
   });
 
   DEST.forEach(function(d){
     let p='<b>'+d.name+'</b><br>'+d.loc;
-    if(d.dl) p+='<br><span class="popup-tag popup-deadline">ð Deadline: '+d.dl+'</span>';
+    if(d.dl) p+='<br><span class="popup-tag popup-deadline">\uD83D\uDCC5 Deadline: '+d.dl+'</span>';
     if(d.notes) p+='<br><small style="color:#aaa;">'+d.notes+'</small>';
-    p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload â</a>';
+    p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload \u2197</a>';
     const m=L.marker([d.lat,d.lng],{icon:makeCircle('green',14)}).bindPopup(p);
     allPgcMarkers.push(m);
     pgcLayer.addLayer(m);
@@ -225,7 +225,7 @@
 
   function updateCount(shown){
     const p = showTypes.green ? DEST.length : 0;
-    document.getElementById('point-count').textContent=(shown||0)+' hotels Â· '+p+' destinations';
+    document.getElementById('point-count').textContent=(shown||0)+' hotels \u00B7 '+p+' destinations';
   }
 
   function toggleLegend(type){
