@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>PGC Travel Map — Full Vision Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #141420; font-family: 'Open Sans', 'Segoe UI', sans-serif; }
+    #map { position: absolute; top: 44px; left: 0; right: 0; bottom: 0; }
+    #titlebar { position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 1000; background: rgba(14,14,28,0.97); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; padding: 0 18px; }
+    #titlebar h1 { font-size: 15px; font-weight: 700; color: #fff; }
+    #titlebar .sub { font-size: 12px; color: #666; }
+    .demo-badge { background: rgba(106,52,96,0.25); border: 1px solid rgba(106,52,96,0.6); color: #c080b4; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.8px; }
+    #point-count { margin-left: auto; font-size: 11px; color: #555; }
+    #legend { position: fixed; bottom: 28px; left: 14px; z-index: 1000; background: rgba(18,18,32,0.94); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 13px 16px; color: #fff; font-size: 12px; }
+    #legend h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #777; margin-bottom: 9px; font-weight: 700; }
+    .legend-item { display: flex; align-items: center; gap: 9px; margin-bottom: 6px; }
+    .legend-item:last-child { margin-bottom: 0; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { color: #ccc; font-size: 12px; }
+    .legend-sub { color: #555; font-size: 10px; margin-left: 4px; }
+    .legend-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
+    .leaflet-popup-content-wrapper { background: #1a1a30; color: #fff; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 6px 24px rgba(0,0,0,0.7); }
+    .leaflet-popup-tip { background: #1a1a30; }
+    .leaflet-popup-content { margin: 13px 15px; font-size: 13px; line-height: 1.5; min-width: 200px; }
+    .popup-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+    .popup-location { color: #888; font-size: 12px; margin-bottom: 6px; }
+    .popup-preview { color: #bbb; font-size: 12px; margin-bottom: 8px; line-height: 1.4; }
+    .popup-deadline { color: #a9d380; font-weight: 700; font-size: 12px; margin-bottom: 8px; }
+    .popup-badge { display: inline-block; padding: 3px 10px; border-radius: 5px; font-weight: 700; font-size: 12px; margin-bottom: 10px; }
+    .popup-btn { display: inline-block; color: #1a1a2e; text-decoration: none; padding: 5px 13px; border-radius: 5px; font-size: 12px; font-weight: 700; }
+    .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; color: #555 !important; }
+    .leaflet-control-attribution a { color: #777 !important; }
+    .leaflet-control-zoom a { background: #1e1e32 !important; color: #aaa !important; border-color: #333 !important; }
+  </style>
+</head>
+<body>
+  <div id="titlebar">
+    <h1>PGC Travel Map</h1>
+    <span class="sub">Holiday Pirates - Partner-Generated Content</span>
+    <span class="demo-badge">DEMO</span>
+    <span id="point-count"></span>
+  </div>
+  <div id="map"></div>
+  <div id="legend">
+    <h4>Type / Budget Extra</h4>
+    <div class="legend-item"><div class="legend-dot" style="background:#a9d380"></div><span class="legend-label">PGC Destination<span class="legend-sub">Parakeet Green</span></span></div>
+    <hr class="legend-divider">
+    <div class="legend-item"><div class="legend-dot" style="background:#7ac3dd"></div><span class="legend-label">PGC Hotel<span class="legend-sub">Pacific Blue</span></span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fcd988"></div><span class="legend-label">(S)PGC Hotel +100<span class="legend-sub">Mai-Tai Yellow</span></span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f79f9d"></div><span class="legend-label">(S)PGC Hotel +160<span class="legend-sub">Hula-Hula Pink</span></span></div>
+  </div>
+  <script>
+    function hotelColor(b) {
+      if (b <= 0)   return { fill: '#7ac3dd', bg: 'rgba(122,195,221,0.15)', border: 'rgba(122,195,221,0.5)', text: '#7ac3dd' };
+      if (b <= 100) return { fill: '#fcd988', bg: 'rgba(252,217,136,0.15)', border: 'rgba(252,217,136,0.5)', text: '#fcd988' };
+      return               { fill: '#f79f9d', bg: 'rgba(247,159,157,0.15)', border: 'rgba(247,159,157,0.5)', text: '#f79f9d' };
+    }
+    const DC = { fill: '#a9d380', bg: 'rgba(169,211,128,0.15)', border: 'rgba(169,211,128,0.5)', text: '#a9d380' };
+    const DEST = [
+      { name: 'Saturnia & Taormina', loc: 'Italy',         lat: 42.659, lng: 11.589, dl: '10.06.26', notes: 'Thermal springs + Sicily' },
+      { name: 'Catalonia Villages',  loc: 'Spain',         lat: 41.820, lng:  1.530, dl: '10.06.26', notes: 'Rural Catalonia' },
+      { name: 'Thailand',            loc: 'Southeast Asia',lat: 13.736, lng:100.523, dl: '15.06.26', notes: 'Beach + culture' },
+      { name: 'Lauterbrunnen',       loc: 'Switzerland',   lat: 46.595, lng:  7.908, dl: '17.06.26', notes: 'Valley of 72 waterfalls' },
+    ];
+    const HOTELS = [
+      { name: 'Therme Erding',           loc: 'Erding, Germany',        lat: 48.306, lng: 11.908, budget: 0 },
+      { name: 'Jaz Soma Beach',          loc: 'Soma Bay, Egypt',        lat: 26.835, lng: 33.942, budget: 0 },
+      { name: 'Amare Beach Ibiza',       loc: 'Ibiza, Spain',           lat: 38.974, lng:  1.420, budget: 0 },
+      { name: 'Sunrise Tucana Resort',   loc: 'Sharm El Sheikh, Egypt', lat: 27.864, lng: 34.295, budget: 0 },
+      { name: 'Lopesan Baobab Resort',   loc: 'Gran Canaria, Spain',    lat: 27.760, lng:-15.567, budget: 0 },
+      { name: 'Allsun Esquinzo Beach',   loc: 'Fuerteventura, Spain',   lat: 28.074, lng:-14.308, budget: 0 },
+      { name: 'Club St George',          loc: 'Cyprus',                 lat: 34.680, lng: 32.900, budget: 0 },
+      { name: 'Titanic Hotel Liverpool', loc: 'Liverpool, UK',          lat: 53.407, lng: -2.992, budget: 100 },
+      { name: 'One Resort Premium',      loc: 'Hammamet, Tunisia',      lat: 36.401, lng: 10.557, budget: 100 },
+      { name: 'Fantasia Hotel de Luxe',  loc: 'Kusadasi, Turkey',       lat: 37.800, lng: 27.260, budget: 100 },
+      { name: 'Hotel Klosterhof Bayern', loc: 'Bavaria, Germany',       lat: 47.722, lng: 12.876, budget: 100 },
+      { name: 'Ananea Rocrita Kreta',    loc: 'Rethymno, Crete',        lat: 35.368, lng: 24.474, budget: 160 },
+      { name: 'Asia Gardens Alicante',   loc: 'Alicante, Spain',        lat: 38.344, lng: -0.488, budget: 160 },
+      { name: 'Maison de Reve Savoie',   loc: 'Savoie, France',         lat: 45.538, lng:  5.815, budget: 160 },
+      { name: 'Preidlhof Luxury Resort', loc: 'South Tyrol, Italy',     lat: 46.600, lng: 11.100, budget: 160 },
+    ];
+    const map = L.map('map').setView([42, 15], 4);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'OSM / CARTO', subdomains: 'abcd', maxZoom: 19 }).addTo(map);
+    DEST.forEach(d => {
+      L.circleMarker([d.lat, d.lng], { radius: 10, fillColor: DC.fill, color: 'rgba(255,255,255,0.3)', weight: 2, fillOpacity: 0.9 })
+        .bindPopup('<div class="popup-name">' + d.name + '</div><div class="popup-location">' + d.loc + '</div><div class="popup-deadline">Deadline: ' + d.dl + '</div><div class="popup-preview">' + d.notes + '</div>', { maxWidth: 270 }).addTo(map);
+    });
+    HOTELS.forEach(h => {
+      const c = hotelColor(h.budget);
+      const badge = h.budget > 0 ? '<div style="margin-bottom:9px"><span class="popup-badge" style="background:' + c.bg + ';color:' + c.text + ';border:1px solid ' + c.border + '">+' + h.budget + ' netto</span></div>' : '';
+      L.circleMarker([h.lat, h.lng], { radius: h.budget >= 160 ? 9 : h.budget >= 100 ? 8 : 7, fillColor: c.fill, color: 'rgba(255,255,255,0.2)', weight: 1.5, fillOpacity: 0.88 })
+        .bindPopup('<div class="popup-name">' + h.name + '</div><div class="popup-location">' + h.loc + '</div>' + badge, { maxWidth: 270 }).addTo(map);
+    });
+    document.getElementById('point-count').textContent = DEST.length + ' destinations - ' + HOTELS.length + ' hotels';
+  </script>
+</body>
+</html>
