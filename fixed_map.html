@@ -1,72 +1,232 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Travel Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-    <style>
-        #map { height: 800px; width: 100%; }
-    </style>
+  <meta charset="utf-8" />
+  <title>PGC Travel Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #141420; font-family: 'Open Sans', 'Segoe UI', sans-serif; }
+    #map { position: absolute; top: 44px; left: 0; right: 0; bottom: 0; }
+
+    #titlebar {
+      position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 1000;
+      background: rgba(14,14,28,0.97); border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 12px; padding: 0 18px;
+    }
+    #titlebar h1   { font-size: 15px; font-weight: 700; color: #fff; }
+    #titlebar .sub { font-size: 12px; color: #666; }
+    #point-count   { margin-left: auto; font-size: 11px; color: #555; }
+
+    #status-msg {
+      position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
+      z-index: 999; padding: 8px 18px; border-radius: 6px; font-size: 13px;
+      white-space: nowrap; display: none; color: #fff;
+    }
+
+    #legend {
+      position: fixed; bottom: 28px; left: 14px; z-index: 1000;
+      background: rgba(18,18,32,0.94); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 13px 16px; color: #fff; font-size: 12px;
+    }
+    #legend h4 {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #777; margin-bottom: 9px; font-weight: 700;
+    }
+    .legend-item { display: flex; align-items: center; gap: 9px; margin-bottom: 6px; }
+    .legend-dot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { color: #ccc; font-size: 12px; }
+    .legend-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
+
+    .marker-cluster-small,
+    .marker-cluster-medium,
+    .marker-cluster-large { background-color: rgba(122,195,221,0.25) !important; }
+    .marker-cluster-small div,
+    .marker-cluster-medium div,
+    .marker-cluster-large div {
+      background-color: rgba(122,195,221,0.82) !important;
+      color: #1a1a2e !important; font-weight: 700;
+    }
+
+    .leaflet-popup-content-wrapper {
+      background: #1a1a30; color: #fff; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+    .leaflet-popup-tip { background: #1a1a30; }
+    .leaflet-popup-content { margin: 12px 14px; font-size: 13px; line-height: 1.5; min-width: 190px; }
+    .popup-name     { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+    .popup-location { color: #888; font-size: 12px; margin-bottom: 6px; }
+    .popup-meta     { font-size: 12px; margin-bottom: 8px; }
+    .popup-deadline { color: #a9d380; font-weight: 700; }
+    .popup-badge    {
+      display: inline-block; padding: 2px 9px; border-radius: 4px;
+      font-size: 11px; font-weight: 700; margin-bottom: 8px;
+    }
+    .popup-btn {
+      display: inline-block; background: #7ac3dd; color: #1a1a2e;
+      text-decoration: none; padding: 5px 13px; border-radius: 5px;
+      font-size: 12px; font-weight: 700;
+    }
+    .popup-btn.green { background: #a9d380; color: #1a3a0a; }
+
+    .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; color: #555 !important; }
+    .leaflet-control-attribution a { color: #777 !important; }
+    .leaflet-control-zoom a { background: #1e1e32 !important; color: #aaa !important; border-color: #333 !important; }
+  </style>
 </head>
 <body>
-    <div id="map"></div>
+  <div id="titlebar">
+    <h1>🗺️ PGC Travel Map</h1>
+    <span class="sub">Holiday Pirates · Partner-Generated Content</span>
+    <span id="point-count"></span>
+  </div>
+  <div id="status-msg"></div>
+  <div id="map"></div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <div id="legend">
+    <h4>Type / Budget Extra</h4>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#a9d380"></div>
+      <span class="legend-label">PGC Destination</span>
+    </div>
+    <hr class="legend-divider">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#7ac3dd"></div>
+      <span class="legend-label">PGC Hotel</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#fcd988"></div>
+      <span class="legend-label">(S)PGC Hotel +€100</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f79f9d"></div>
+      <span class="legend-label">(S)PGC Hotel +€160</span>
+    </div>
+  </div>
 
-    <script>
-        const map = L.map('map').setView([48, 10], 3); 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        const markers = L.markerClusterGroup();
+  <script>
+    const HOTELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=0&single=true&output=csv';
+    const PGC_GID  = '1637414386';
+    const PGC_URL  = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=${PGC_GID}&single=true&output=csv`;
 
-        async function loadData() {
-            try {
-                const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=0&single=true&output=csv');
-                const csvText = await response.text();
-                
-                Papa.parse(csvText, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: function(result) {
-                        console.log("Parsed Data:", result.data);
-                        
-                        markers.clearLayers(); 
+    function hotelColor(budgetExtra) {
+      const b = parseFloat(budgetExtra) || 0;
+      if (b <= 0)   return { fill: '#7ac3dd', badge: null };
+      if (b <= 100) return { fill: '#fcd988', badge: `+€${b} netto` };
+      return              { fill: '#f79f9d', badge: `+€${b} netto` };
+    }
 
-                        result.data.forEach(row => {
-                            let name = row["Name"]?.trim();
-                            let location = row["Location"]?.trim();
-                            let lat = parseFloat(row["Latitude"]?.trim());
-                            let lng = parseFloat(row["Longitude"]?.trim());
-                            let dealLink = row["Deal Link"]?.trim();
+    const map = L.map('map', { zoomControl: true }).setView([45, 10], 3);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd', maxZoom: 19
+    }).addTo(map);
 
-                            if (!name || !location || isNaN(lat) || isNaN(lng)) {
-                                console.warn("Skipping row due to missing data:", row);
-                                return;
-                            }
+    const clusters = L.markerClusterGroup({ maxClusterRadius: 40 });
 
-                            let popupContent = `<b>${name}</b><br>${location}`;
-                            if (dealLink) {
-                                popupContent += `<br><a href="${dealLink.startsWith('http') ? dealLink : 'https://' + dealLink}" target="_blank">View Deal</a>`;
-                            }
+    function showStatus(msg, isError) {
+      const el = document.getElementById('status-msg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.style.background = isError ? 'rgba(247,159,157,0.95)' : 'rgba(106,52,96,0.93)';
+      el.style.color = isError ? '#330000' : '#fff';
+      if (!isError) setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
 
-                            let marker = L.marker([lat, lng]).bindPopup(popupContent);
-                            markers.addLayer(marker);
-                        });
+    async function loadHotels() {
+      const resp = await fetch(HOTELS_URL);
+      if (!resp.ok) throw new Error(`Hotels sheet HTTP ${resp.status}`);
+      const csv = await resp.text();
+      if (csv.trim().startsWith('<')) throw new Error('Hotels sheet returned HTML — check the gid');
+      const { data } = Papa.parse(csv, { header: true, skipEmptyLines: true });
+      let count = 0;
+      data.forEach(row => {
+        const name   = (row['Name'] || '').trim();
+        const loc    = (row['Location'] || '').trim();
+        const lat    = parseFloat(row['Latitude']);
+        const lng    = parseFloat(row['Longitude']);
+        const link   = (row['Deal Link'] || '').trim();
+        const prev   = (row['Link Preview'] || '').trim();
+        const budget = row['Budget Extra (€)'] || row['Budget Extra'] || '0';
+        if (!name || isNaN(lat) || isNaN(lng)) return;
+        const { fill, badge } = hotelColor(budget);
+        const badgeHtml = badge
+          ? `<div style="margin-bottom:8px"><span class="popup-badge" style="background:${fill}22;color:${fill};border:1px solid ${fill}66">${badge}</span></div>`
+          : '';
+        const marker = L.circleMarker([lat, lng], {
+          radius: badge ? 8 : 7,
+          fillColor: fill, color: 'rgba(255,255,255,0.2)',
+          weight: 1.5, fillOpacity: 0.88
+        });
+        marker.bindPopup(`
+          <div class="popup-name">${name}</div>
+          ${loc  ? `<div class="popup-location">📍 ${loc}</div>` : ''}
+          ${prev ? `<div class="popup-meta">${prev}</div>` : ''}
+          ${badgeHtml}
+          ${link ? `<a class="popup-btn" href="${link}" target="_blank" rel="noopener">View Deal ↗</a>` : ''}
+        `, { maxWidth: 270 });
+        clusters.addLayer(marker);
+        count++;
+      });
+      return count;
+    }
 
-                        map.addLayer(markers);
-                        if (markers.getLayers().length > 0) {
-                            map.fitBounds(markers.getBounds(), { padding: [50, 50] });
-                        }
-                    }
-                });
+    async function loadPGCOpenings() {
+      if (PGC_GID === 'PASTE_PGC_GID_HERE') { console.warn('PGC_GID not set'); return 0; }
+      const resp = await fetch(PGC_URL);
+      if (!resp.ok) throw new Error(`PGC sheet HTTP ${resp.status}`);
+      const csv = await resp.text();
+      if (csv.trim().startsWith('<')) throw new Error('PGC sheet returned HTML — check the gid');
+      const { data } = Papa.parse(csv, { header: true, skipEmptyLines: true });
+      let count = 0;
+      data.forEach(row => {
+        const name     = (row['Name'] || '').trim();
+        const loc      = (row['Location'] || '').trim();
+        const lat      = parseFloat(row['Latitude']);
+        const lng      = parseFloat(row['Longitude']);
+        const deadline = (row['Deadline'] || '').trim();
+        const upload   = (row['Upload Link'] || '').trim();
+        const notes    = (row['Notes'] || '').trim();
+        if (!name || isNaN(lat) || isNaN(lng)) return;
+        const marker = L.circleMarker([lat, lng], {
+          radius: 9, fillColor: '#a9d380',
+          color: 'rgba(255,255,255,0.2)', weight: 2, fillOpacity: 0.9
+        });
+        marker.bindPopup(`
+          <div class="popup-name">${name}</div>
+          ${loc      ? `<div class="popup-location">📍 ${loc}</div>` : ''}
+          ${deadline ? `<div class="popup-meta">⏳ <span class="popup-deadline">Deadline: ${deadline}</span></div>` : ''}
+          ${notes    ? `<div class="popup-meta" style="color:#bbb;font-size:11px">${notes}</div>` : ''}
+          ${upload   ? `<a class="popup-btn green" href="${upload}" target="_blank" rel="noopener">Upload ↗</a>` : ''}
+        `, { maxWidth: 270 });
+        clusters.addLayer(marker);
+        count++;
+      });
+      return count;
+    }
 
-            } catch (error) {
-                console.error('Error loading data:', error);
-            }
-        }
-
-        loadData();
-    </script>
+    async function loadAll() {
+      showStatus('Loading map data…', false);
+      try {
+        const [hotelCount, pgcCount] = await Promise.all([loadHotels(), loadPGCOpenings()]);
+        map.addLayer(clusters);
+        document.getElementById('point-count').textContent = `${hotelCount} hotels · ${pgcCount} destinations`;
+        document.getElementById('status-msg').style.display = 'none';
+      } catch (err) {
+        console.error('Map load error:', err);
+        showStatus(`⚠️ ${err.message}`, true);
+      }
+    }
+    loadAll();
+  </script>
 </body>
 </html>
