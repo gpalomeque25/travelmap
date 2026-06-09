@@ -4,101 +4,59 @@
   <meta charset="utf-8" />
   <title>PGC Travel Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" />
-
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; background: #141420; font-family: 'Open Sans', 'Segoe UI', sans-serif; }
     #map { position: absolute; top: 44px; left: 0; right: 0; bottom: 0; }
-    #titlebar {
-      position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 1000;
-      background: rgba(14,14,28,0.97); border-bottom: 1px solid rgba(255,255,255,0.08);
-      display: flex; align-items: center; gap: 12px; padding: 0 18px;
-    }
+    #titlebar { position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 1000; background: rgba(14,14,28,0.97); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; padding: 0 18px; }
     #titlebar h1 { font-size: 15px; font-weight: 700; color: #fff; }
     #titlebar .sub { font-size: 12px; color: #666; }
-    #point-count  { margin-left: auto; font-size: 11px; color: #555; }
-    #status-msg {
-      position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
-      z-index: 999; padding: 8px 18px; border-radius: 6px; font-size: 13px;
-      white-space: nowrap; display: none; color: #fff;
-    }
-    #legend {
-      position: fixed; bottom: 28px; left: 14px; z-index: 1000;
-      background: rgba(14,14,28,0.88); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #ccc;
-      backdrop-filter: blur(4px);
-    }
-    #legend .legend-title { font-size: 10px; font-weight: 700; color: #555;
-      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    #point-count { margin-left: auto; font-size: 11px; color: #555; }
+    #status-msg { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); z-index: 999; padding: 8px 18px; border-radius: 6px; font-size: 13px; white-space: nowrap; display: none; color: #fff; }
+    #legend { position: fixed; bottom: 28px; left: 14px; z-index: 1000; background: rgba(14,14,28,0.88); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #ccc; backdrop-filter: blur(4px); }
+    #legend .legend-title { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
     #legend .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
     #legend .legend-row:last-child { margin-bottom: 0; }
     #legend .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.5); }
-    .leaflet-popup-content-wrapper {
-      background: rgba(18,18,32,0.94); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; color: #eee; font-family: 'Open Sans', sans-serif;
-    }
+    .leaflet-popup-content-wrapper { background: rgba(18,18,32,0.94); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #eee; font-family: 'Open Sans', sans-serif; }
     .leaflet-popup-tip { background: rgba(18,18,32,0.94); }
     .leaflet-popup-content { font-size: 13px; line-height: 1.5; min-width: 160px; }
     .leaflet-popup-content b { color: #fff; font-size: 14px; }
     .leaflet-popup-content a { color: #7ac3dd; }
-    .popup-deadline {
-      display: inline-block; margin-top: 4px; padding: 2px 8px;
-      border-radius: 4px; font-size: 11px; font-weight: 600;
-      background: #a9d380; color: #141420;
-    }
-    .popup-upload {
-      display: inline-block; margin-top: 8px; padding: 5px 12px;
-      border-radius: 5px; font-size: 12px; font-weight: 600;
-      background: #a9d380; color: #141420; text-decoration: none;
-    }
+    .popup-deadline { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #a9d380; color: #141420; }
+    .popup-upload { display: inline-block; margin-top: 8px; padding: 5px 12px; border-radius: 5px; font-size: 12px; font-weight: 600; background: #a9d380; color: #141420; text-decoration: none; }
     .popup-upload:hover { background: #c2e89f; }
-    .marker-cluster-small  div,
-    .marker-cluster-medium div,
-    .marker-cluster-large  div { background-color: #7ac3dd; color: #141420; font-weight: 700; }
-    .marker-cluster-small,
-    .marker-cluster-medium,
-    .marker-cluster-large  { background-color: rgba(122,195,221,0.3); }
+    .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: #7ac3dd; color: #141420; font-weight: 700; }
+    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(122,195,221,0.3); }
   </style>
 </head>
 <body>
-
 <div id="titlebar">
   <h1>🏴 PGC Travel Map</h1>
   <span class="sub">Holiday Pirates · Partner-Generated Content</span>
   <span id="point-count"></span>
 </div>
-
 <div id="status-msg"></div>
 <div id="map"></div>
-
 <div id="legend">
   <div class="legend-title">Map Legend</div>
-  <div class="legend-row">
-    <div class="dot" style="background:#a9d380;"></div>
-    <span>PGC Destination</span>
-  </div>
-  <div class="legend-row">
-    <div class="dot" style="background:#7ac3dd;"></div>
-    <span>(S)PGC Hotel</span>
-  </div>
+  <div class="legend-row"><div class="dot" style="background:#a9d380;"></div><span>PGC Destination</span></div>
+  <div class="legend-row"><div class="dot" style="background:#7ac3dd;"></div><span>(S)PGC Hotel</span></div>
 </div>
-
 <script>
   const HOTELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=0&single=true&output=csv';
-  const PGC_GID   = '1637414386';
-  const PGC_URL   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=' + PGC_GID + '&single=true&output=csv';
-
-  const COLOR = { blue: '#7ac3dd', yellow: '#fcd988', pink: '#f79f9d', green: '#a9d380' };
+  const PGC_GID = '1637414386';
+  const PGC_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=' + PGC_GID + '&single=true&output=csv';
+  const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
+  const COLOR = { blue:'#7ac3dd', yellow:'#fcd988', pink:'#f79f9d', green:'#a9d380' };
 
   function hotelColor(b) {
     b = parseFloat(b) || 0;
@@ -106,95 +64,82 @@
     if (b <= 100) return COLOR.yellow;
     return COLOR.pink;
   }
-
   function makeCircle(color, size) {
-    return L.divIcon({
-      className: '',
-      html: '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:' + color + ';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px ' + color + '88;"></div>',
-      iconSize: [size, size], iconAnchor: [size/2, size/2],
-    });
+    return L.divIcon({ className:'', html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px '+color+'88;"></div>', iconSize:[size,size], iconAnchor:[size/2,size/2] });
   }
 
-  const map = L.map('map', { zoomControl: true }).setView([48, 10], 4);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OSM &copy; CARTO', subdomains: 'abcd', maxZoom: 19,
-  }).addTo(map);
-
-  const hotelCluster = L.markerClusterGroup({ chunkedLoading: true });
+  const map = L.map('map',{zoomControl:true}).setView([48,10],4);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+  const hotelCluster = L.markerClusterGroup({chunkedLoading:true});
   const pgcLayer = L.layerGroup();
   map.addLayer(hotelCluster);
   map.addLayer(pgcLayer);
 
-  function showStatus(msg, bg) {
-    const el = document.getElementById('status-msg');
-    el.textContent = msg; el.style.background = bg || 'rgba(14,14,28,0.9)'; el.style.display = 'block';
-  }
-  function hideStatus() { document.getElementById('status-msg').style.display = 'none'; }
-  function updateCount(h, p) {
-    document.getElementById('point-count').textContent = h + ' hotel' + (h!==1?'s':'') + ' · ' + p + ' destination' + (p!==1?'s':'');
-  }
+  function showStatus(msg,bg){const el=document.getElementById('status-msg');el.textContent=msg;el.style.background=bg||'rgba(14,14,28,0.9)';el.style.display='block';}
+  function hideStatus(){document.getElementById('status-msg').style.display='none';}
+  function updateCount(h,p){document.getElementById('point-count').textContent=h+' hotel'+(h!==1?'s':'')+' · '+p+' destination'+(p!==1?'s':'');}
 
-  let hotelCount = 0;
-  function loadHotels() {
-    return new Promise(function(resolve) {
-      Papa.parse(HOTELS_URL, { download:true, header:true, skipEmptyLines:true,
-        complete: function(r) {
-          r.data.forEach(function(row) {
-            const lat = parseFloat(row['Latitude']), lng = parseFloat(row['Longitude']);
-            if (isNaN(lat)||isNaN(lng)) return;
-            const name = (row['Name']||'').trim();
-            const loc  = (row['Location']||row['City']||'').trim();
-            const fill = hotelColor(row['Budget Extra (€)']||row['Budget Extra']||0);
-            const link = (row['Deal Link']||row['Link']||'').trim();
-            const prev = (row['Link Preview']||'').trim();
-            let p = '<b>'+name+'</b>';
-            if (loc)  p += '<br>'+loc;
-            if (prev) p += '<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;" />';
-            if (link) p += '<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal →</a>';
+  let hotelCount=0;
+  function loadHotels(){
+    return new Promise(function(resolve){
+      Papa.parse(HOTELS_URL,{download:true,header:true,skipEmptyLines:true,
+        complete:function(r){
+          r.data.forEach(function(row){
+            const lat=parseFloat(row['Latitude']),lng=parseFloat(row['Longitude']);
+            if(isNaN(lat)||isNaN(lng))return;
+            const name=(row['Name']||'').trim();
+            const loc=(row['Location']||row['City']||'').trim();
+            const fill=hotelColor(row['Budget Extra (€)']||row['Budget Extra']||0);
+            const link=(row['Deal Link']||row['Link']||'').trim();
+            const prev=(row['Link Preview']||'').trim();
+            let p='<b>'+name+'</b>';
+            if(loc) p+='<br>'+loc;
+            if(prev) p+='<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;" />';
+            if(link) p+='<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal →</a>';
+            p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload ↗</a>';
             hotelCluster.addLayer(L.marker([lat,lng],{icon:makeCircle(fill,12)}).bindPopup(p));
             hotelCount++;
           });
           resolve();
         },
-        error: function(e){ console.error(e); resolve(); }
+        error:function(e){console.error(e);resolve();}
       });
     });
   }
 
-  let pgcCount = 0;
-  function loadPGCOpenings() {
-    return new Promise(function(resolve) {
-      Papa.parse(PGC_URL, { download:true, header:true, skipEmptyLines:true,
-        complete: function(r) {
-          r.data.forEach(function(row) {
-            const lat = parseFloat(row['Lat']||row['Latitude']);
-            const lng = parseFloat(row['Lng']||row['Longitude']);
-            if (isNaN(lat)||isNaN(lng)) return;
-            const dest     = (row['Destination']||row['Name']||'').trim();
-            const loc      = (row['Location']||'').trim();
-            const deadline = (row['Deadline']||'').trim();
-            const notes    = (row['Notes']||'').trim();
-            const uplink   = (row['Upload Link']||row['Upload']||'').trim();
-            let p = '<b>'+dest+'</b>';
-            if (loc)      p += '<br>'+loc;
-            if (deadline) p += '<br><span class="popup-deadline">📅 Deadline: '+deadline+'</span>';
-            if (notes)    p += '<br><small style="color:#aaa;">'+notes+'</small>';
-            const href = uplink || 'https://dam.holidaypirates.com';
-            p += '<br><a class="popup-upload" href="'+href+'" target="_blank">Upload ↗</a>';
+  let pgcCount=0;
+  function loadPGCOpenings(){
+    return new Promise(function(resolve){
+      Papa.parse(PGC_URL,{download:true,header:true,skipEmptyLines:true,
+        complete:function(r){
+          r.data.forEach(function(row){
+            const lat=parseFloat(row['Lat']||row['Latitude']);
+            const lng=parseFloat(row['Lng']||row['Longitude']);
+            if(isNaN(lat)||isNaN(lng))return;
+            const dest=(row['Destination']||row['Name']||'').trim();
+            const loc=(row['Location']||'').trim();
+            const deadline=(row['Deadline']||'').trim();
+            const notes=(row['Notes']||'').trim();
+            const uplink=(row['Upload Link']||row['Upload']||'').trim();
+            let p='<b>'+dest+'</b>';
+            if(loc) p+='<br>'+loc;
+            if(deadline) p+='<br><span class="popup-deadline">📅 Deadline: '+deadline+'</span>';
+            if(notes) p+='<br><small style="color:#aaa;">'+notes+'</small>';
+            p+='<br><a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">Upload ↗</a>';
             pgcLayer.addLayer(L.marker([lat,lng],{icon:makeCircle(COLOR.green,14)}).bindPopup(p));
             pgcCount++;
           });
           resolve();
         },
-        error: function(e){ console.error(e); resolve(); }
+        error:function(e){console.error(e);resolve();}
       });
     });
   }
 
-  async function loadAll() {
+  async function loadAll(){
     showStatus('Loading map data…','rgba(122,195,221,0.2)');
-    await Promise.all([loadHotels(), loadPGCOpenings()]);
-    updateCount(hotelCount, pgcCount);
+    await Promise.all([loadHotels(),loadPGCOpenings()]);
+    updateCount(hotelCount,pgcCount);
     hideStatus();
   }
   loadAll();
