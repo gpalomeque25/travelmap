@@ -21,7 +21,6 @@
     .legend-item:last-child { margin-bottom: 0; }
     .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .legend-label { color: #ccc; font-size: 12px; }
-    .legend-sub { color: #555; font-size: 10px; margin-left: 4px; }
     .legend-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
     .leaflet-popup-content-wrapper { background: #1a1a30; color: #fff; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 6px 24px rgba(0,0,0,0.7); }
     .leaflet-popup-tip { background: #1a1a30; }
@@ -30,8 +29,8 @@
     .popup-location { color: #888; font-size: 12px; margin-bottom: 6px; }
     .popup-preview { color: #bbb; font-size: 12px; margin-bottom: 8px; line-height: 1.4; }
     .popup-deadline { color: #a9d380; font-weight: 700; font-size: 12px; margin-bottom: 8px; }
-    .popup-badge { display: inline-block; padding: 3px 10px; border-radius: 5px; font-weight: 700; font-size: 12px; margin-bottom: 10px; }
-    .popup-btn { display: inline-block; color: #1a1a2e; text-decoration: none; padding: 5px 13px; border-radius: 5px; font-size: 12px; font-weight: 700; }
+    .popup-upload { display: inline-block; margin-top: 8px; padding: 5px 13px; border-radius: 5px; font-size: 12px; font-weight: 700; background: #a9d380; color: #1a1a2e; text-decoration: none; }
+    .popup-upload:hover { background: #c2e89f; }
     .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; color: #555 !important; }
     .leaflet-control-attribution a { color: #777 !important; }
     .leaflet-control-zoom a { background: #1e1e32 !important; color: #aaa !important; border-color: #333 !important; }
@@ -39,32 +38,31 @@
 </head>
 <body>
   <div id="titlebar">
-    <h1>PGC Travel Map</h1>
-    <span class="sub">Holiday Pirates - Partner-Generated Content</span>
+    <h1>🏴 PGC Travel Map</h1>
+    <span class="sub">Holiday Pirates · Partner-Generated Content</span>
     <span class="demo-badge">DEMO</span>
     <span id="point-count"></span>
   </div>
   <div id="map"></div>
   <div id="legend">
-    <h4>Type / Budget Extra</h4>
-    <div class="legend-item"><div class="legend-dot" style="background:#a9d380"></div><span class="legend-label">PGC Destination<span class="legend-sub">Parakeet Green</span></span></div>
+    <h4>Map Legend</h4>
+    <div class="legend-item"><div class="legend-dot" style="background:#a9d380"></div><span class="legend-label">PGC Destination</span></div>
     <hr class="legend-divider">
-    <div class="legend-item"><div class="legend-dot" style="background:#7ac3dd"></div><span class="legend-label">PGC Hotel<span class="legend-sub">Pacific Blue</span></span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:#fcd988"></div><span class="legend-label">(S)PGC Hotel +100<span class="legend-sub">Mai-Tai Yellow</span></span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:#f79f9d"></div><span class="legend-label">(S)PGC Hotel +160<span class="legend-sub">Hula-Hula Pink</span></span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7ac3dd"></div><span class="legend-label">(S)PGC Hotel</span></div>
   </div>
   <script>
+    const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
     function hotelColor(b) {
-      if (b <= 0)   return { fill: '#7ac3dd', bg: 'rgba(122,195,221,0.15)', border: 'rgba(122,195,221,0.5)', text: '#7ac3dd' };
-      if (b <= 100) return { fill: '#fcd988', bg: 'rgba(252,217,136,0.15)', border: 'rgba(252,217,136,0.5)', text: '#fcd988' };
-      return               { fill: '#f79f9d', bg: 'rgba(247,159,157,0.15)', border: 'rgba(247,159,157,0.5)', text: '#f79f9d' };
+      if (b <= 0)   return { fill: '#7ac3dd' };
+      if (b <= 100) return { fill: '#fcd988' };
+      return               { fill: '#f79f9d' };
     }
-    const DC = { fill: '#a9d380', bg: 'rgba(169,211,128,0.15)', border: 'rgba(169,211,128,0.5)', text: '#a9d380' };
+    const DC = { fill: '#a9d380' };
     const DEST = [
-      { name: 'Saturnia & Taormina', loc: 'Italy',         lat: 42.659, lng: 11.589, dl: '10.06.26', notes: 'Thermal springs + Sicily' },
-      { name: 'Catalonia Villages',  loc: 'Spain',         lat: 41.820, lng:  1.530, dl: '10.06.26', notes: 'Rural Catalonia' },
-      { name: 'Thailand',            loc: 'Southeast Asia',lat: 13.736, lng:100.523, dl: '15.06.26', notes: 'Beach + culture' },
-      { name: 'Lauterbrunnen',       loc: 'Switzerland',   lat: 46.595, lng:  7.908, dl: '17.06.26', notes: 'Valley of 72 waterfalls' },
+      { name: 'Saturnia & Taormina', loc: 'Italy',          lat: 42.659, lng: 11.589, dl: '10.06.26', notes: 'Thermal springs + Sicily' },
+      { name: 'Catalonia Villages',  loc: 'Spain',          lat: 41.820, lng:  1.530, dl: '10.06.26', notes: 'Rural Catalonia' },
+      { name: 'Thailand',            loc: 'Southeast Asia', lat: 13.736, lng:100.523, dl: '15.06.26', notes: 'Beach + culture' },
+      { name: 'Lauterbrunnen',       loc: 'Switzerland',    lat: 46.595, lng:  7.908, dl: '17.06.26', notes: 'Valley of 72 waterfalls — scenic content' },
     ];
     const HOTELS = [
       { name: 'Therme Erding',           loc: 'Erding, Germany',        lat: 48.306, lng: 11.908, budget: 0 },
@@ -85,17 +83,24 @@
     ];
     const map = L.map('map').setView([42, 15], 4);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'OSM / CARTO', subdomains: 'abcd', maxZoom: 19 }).addTo(map);
-    DEST.forEach(d => {
-      L.circleMarker([d.lat, d.lng], { radius: 10, fillColor: DC.fill, color: 'rgba(255,255,255,0.3)', weight: 2, fillOpacity: 0.9 })
-        .bindPopup('<div class="popup-name">' + d.name + '</div><div class="popup-location">' + d.loc + '</div><div class="popup-deadline">Deadline: ' + d.dl + '</div><div class="popup-preview">' + d.notes + '</div>', { maxWidth: 270 }).addTo(map);
+    DEST.forEach(function(d) {
+      const popup = '<div class="popup-name">'+d.name+'</div>'
+        +'<div class="popup-location">'+d.loc+'</div>'
+        +'<div class="popup-deadline">📅 Deadline: '+d.dl+'</div>'
+        +'<div class="popup-preview">'+d.notes+'</div>'
+        +'<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload ↗</a>';
+      L.circleMarker([d.lat,d.lng],{radius:10,fillColor:DC.fill,color:'rgba(255,255,255,0.3)',weight:2,fillOpacity:0.9})
+        .bindPopup(popup,{maxWidth:270}).addTo(map);
     });
-    HOTELS.forEach(h => {
+    HOTELS.forEach(function(h) {
       const c = hotelColor(h.budget);
-      const badge = h.budget > 0 ? '<div style="margin-bottom:9px"><span class="popup-badge" style="background:' + c.bg + ';color:' + c.text + ';border:1px solid ' + c.border + '">+' + h.budget + ' netto</span></div>' : '';
-      L.circleMarker([h.lat, h.lng], { radius: h.budget >= 160 ? 9 : h.budget >= 100 ? 8 : 7, fillColor: c.fill, color: 'rgba(255,255,255,0.2)', weight: 1.5, fillOpacity: 0.88 })
-        .bindPopup('<div class="popup-name">' + h.name + '</div><div class="popup-location">' + h.loc + '</div>' + badge, { maxWidth: 270 }).addTo(map);
+      const popup = '<div class="popup-name">'+h.name+'</div>'
+        +'<div class="popup-location">'+h.loc+'</div>'
+        +'<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload ↗</a>';
+      L.circleMarker([h.lat,h.lng],{radius:h.budget>=160?9:h.budget>=100?8:7,fillColor:c.fill,color:'rgba(255,255,255,0.2)',weight:1.5,fillOpacity:0.88})
+        .bindPopup(popup,{maxWidth:270}).addTo(map);
     });
-    document.getElementById('point-count').textContent = DEST.length + ' destinations - ' + HOTELS.length + ' hotels';
+    document.getElementById('point-count').textContent = DEST.length + ' destinations · ' + HOTELS.length + ' hotels';
   </script>
 </body>
 </html>
