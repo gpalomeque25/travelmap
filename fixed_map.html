@@ -10,32 +10,71 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; background: #141420; font-family: 'Open Sans', 'Segoe UI', sans-serif; }
-    #map { position: absolute; top: 44px; left: 0; right: 0; bottom: 0; }
-    #titlebar { position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 1000; background: rgba(14,14,28,0.97); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; padding: 0 18px; }
-    #titlebar h1 { font-size: 15px; font-weight: 700; color: #fff; }
-    #titlebar .sub { font-size: 12px; color: #666; }
-    #point-count { margin-left: auto; font-size: 11px; color: #555; }
-    #status-msg { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); z-index: 999; padding: 8px 18px; border-radius: 6px; font-size: 13px; white-space: nowrap; display: none; color: #fff; }
-    #legend { position: fixed; bottom: 28px; left: 14px; z-index: 1000; background: rgba(14,14,28,0.88); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #ccc; backdrop-filter: blur(4px); }
-    #legend .legend-title { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-    #legend .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    #legend .legend-row:last-child { margin-bottom: 0; }
-    #legend .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.5); }
-    .leaflet-popup-content-wrapper { background: rgba(18,18,32,0.94); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #eee; font-family: 'Open Sans', sans-serif; }
-    .leaflet-popup-tip { background: rgba(18,18,32,0.94); }
-    .leaflet-popup-content { font-size: 13px; line-height: 1.5; min-width: 160px; }
-    .leaflet-popup-content b { color: #fff; font-size: 14px; }
-    .leaflet-popup-content a { color: #7ac3dd; }
-    .popup-deadline { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #a9d380; color: #141420; }
-    .popup-upload { display: inline-block; margin-top: 8px; padding: 5px 12px; border-radius: 5px; font-size: 12px; font-weight: 600; background: #a9d380; color: #141420; text-decoration: none; }
-    .popup-upload:hover { background: #c2e89f; }
-    .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: #7ac3dd; color: #141420; font-weight: 700; }
-    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(122,195,221,0.3); }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html,body { height:100%; background:#141420; font-family:'Open Sans','Segoe UI',sans-serif; color:#ccc; }
+    #titlebar { position:fixed; top:0; left:0; right:0; height:44px; z-index:1000;
+      background:rgba(14,14,28,0.97); border-bottom:1px solid rgba(255,255,255,0.08);
+      display:flex; align-items:center; gap:12px; padding:0 18px; }
+    #titlebar h1 { font-size:15px; font-weight:700; color:#fff; white-space:nowrap; }
+    #titlebar .sub { font-size:12px; color:#555; white-space:nowrap; }
+    #point-count { margin-left:auto; font-size:13px; font-weight:600; color:#7ac3dd; white-space:nowrap; }
+    #map { position:absolute; top:44px; left:0; right:290px; bottom:0; }
+    #panel { position:fixed; top:44px; right:0; bottom:0; width:290px; z-index:999;
+      background:rgba(12,12,24,0.97); border-left:1px solid rgba(255,255,255,0.07);
+      overflow-y:auto; display:flex; flex-direction:column; gap:0; }
+    .p-section { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .p-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+      color:#444; margin-bottom:10px; }
+    .leg-row { display:flex; align-items:center; gap:9px; margin-bottom:7px; }
+    .leg-row:last-child { margin-bottom:0; }
+    .leg-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; border:2px solid rgba(255,255,255,0.4); }
+    .leg-label { font-size:12px; color:#bbb; }
+    .f-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
+    .f-row:last-child { margin-bottom:0; }
+    .f-label { font-size:12px; color:#aaa; }
+    .f-select { background:#1a1a2e; border:1px solid rgba(255,255,255,0.12); color:#ccc;
+      font-size:11px; padding:4px 7px; border-radius:5px; cursor:pointer; outline:none; }
+    .f-toggle { display:flex; align-items:center; gap:7px; cursor:pointer; }
+    .f-toggle input { accent-color:#a9d380; width:14px; height:14px; cursor:pointer; }
+    .btn-reset { font-size:11px; color:#555; background:none; border:1px solid rgba(255,255,255,0.1);
+      padding:3px 10px; border-radius:4px; cursor:pointer; margin-top:6px; width:100%; }
+    .btn-reset:hover { color:#aaa; border-color:rgba(255,255,255,0.25); }
+    .comp-tabs { display:flex; gap:6px; margin-bottom:10px; }
+    .comp-tab { flex:1; font-size:11px; font-weight:600; padding:5px 6px; border-radius:5px;
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color:#666; cursor:pointer; text-align:center; }
+    .comp-tab.active { background:rgba(122,195,221,0.15); border-color:#7ac3dd; color:#7ac3dd; }
+    .comp-table { width:100%; border-collapse:collapse; font-size:11px; }
+    .comp-table th { text-align:left; color:#555; font-weight:600; font-size:10px;
+      text-transform:uppercase; letter-spacing:.05em; padding:3px 0 6px; }
+    .comp-table td { padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:#bbb; }
+    .comp-table td:last-child { text-align:right; color:#7ac3dd; font-weight:600; }
+    .comp-eur { color:#7ac3dd !important; }
+    .comp-gbp { color:#555 !important; font-size:10px; font-weight:400 !important; }
+    .leaflet-popup-content-wrapper { background:rgba(18,18,32,0.95); border:1px solid rgba(255,255,255,0.1);
+      border-radius:8px; color:#eee; font-family:'Open Sans',sans-serif; }
+    .leaflet-popup-tip { background:rgba(18,18,32,0.95); }
+    .leaflet-popup-content { font-size:13px; line-height:1.5; min-width:155px; }
+    .leaflet-popup-content b { color:#fff; font-size:14px; }
+    .leaflet-popup-content a { color:#7ac3dd; }
+    .popup-tag { display:inline-block; margin:2px 3px 2px 0; padding:1px 7px;
+      border-radius:3px; font-size:10px; font-weight:600; }
+    .popup-deadline { background:#a9d380; color:#141420; }
+    .popup-family   { background:#fcd988; color:#141420; }
+    .popup-season   { background:rgba(255,255,255,0.12); color:#ccc; }
+    .popup-upload { display:inline-block; margin-top:8px; padding:5px 12px;
+      border-radius:5px; font-size:12px; font-weight:600; background:#a9d380;
+      color:#141420; text-decoration:none; }
+    .popup-upload:hover { background:#c2e89f; }
+    .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div
+      { background-color:#7ac3dd; color:#141420; font-weight:700; }
+    .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large
+      { background-color:rgba(122,195,221,0.25); }
+    #status-msg { position:fixed; top:56px; left:50%; transform:translateX(-50%);
+      z-index:998; padding:8px 18px; border-radius:6px; font-size:13px;
+      white-space:nowrap; display:none; color:#fff; }
   </style>
 </head>
 <body>
@@ -46,40 +85,117 @@
 </div>
 <div id="status-msg"></div>
 <div id="map"></div>
-<div id="legend">
-  <div class="legend-title">Map Legend</div>
-  <div class="legend-row"><div class="dot" style="background:#a9d380;"></div><span>PGC Destination</span></div>
-  <div class="legend-row"><div class="dot" style="background:#7ac3dd;"></div><span>(S)PGC Hotel</span></div>
+<div id="panel">
+  <div class="p-section">
+    <div class="p-title">Legend</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#a9d380"></div><span class="leg-label">PGC Destination</span></div>
+    <div class="leg-row"><div class="leg-dot" style="background:#7ac3dd"></div><span class="leg-label">(S)PGC Hotel</span></div>
+  </div>
+  <div class="p-section">
+    <div class="p-title">Filters</div>
+    <div class="f-row">
+      <label class="f-toggle"><input type="checkbox" id="f-family" onchange="applyFilters()"><span class="f-label">🏖️ Family deals only</span></label>
+    </div>
+    <div class="f-row">
+      <span class="f-label">Season</span>
+      <select class="f-select" id="f-season" onchange="applyFilters()">
+        <option value="">All seasons</option>
+        <option value="summer">☀️ Summer</option>
+        <option value="winter">❄️ Winter</option>
+      </select>
+    </div>
+    <div class="f-row">
+      <span class="f-label">Added</span>
+      <select class="f-select" id="f-recent" onchange="applyFilters()">
+        <option value="">All time</option>
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">↺ Reset filters</button>
+  </div>
+  <div class="p-section">
+    <div class="p-title">PGC Compensation</div>
+    <div class="comp-tabs">
+      <div class="comp-tab active" onclick="showComp('video',this)">📹 Video</div>
+      <div class="comp-tab" onclick="showComp('photo',this)">📷 Photo</div>
+    </div>
+    <div id="comp-video">
+      <table class="comp-table">
+        <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
+        <tr><td>1-2 videos</td><td class="comp-eur">€14/video</td><td class="comp-gbp">£12</td></tr>
+        <tr><td>3-8 videos</td><td class="comp-eur">€12/video</td><td class="comp-gbp">£10</td></tr>
+        <tr><td>9-15 videos</td><td class="comp-eur">€120 pkg</td><td class="comp-gbp">£105</td></tr>
+        <tr><td>16-30 videos</td><td class="comp-eur">€160 pkg</td><td class="comp-gbp">£140</td></tr>
+        <tr><td>30+ videos</td><td class="comp-eur">€200 pkg</td><td class="comp-gbp">£175</td></tr>
+      </table>
+    </div>
+    <div id="comp-photo" style="display:none">
+      <table class="comp-table">
+        <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
+        <tr><td>1-2 photos</td><td class="comp-eur">€4/photo</td><td class="comp-gbp">£3.50</td></tr>
+        <tr><td>3-5 photos</td><td class="comp-eur">€3.50/photo</td><td class="comp-gbp">£3</td></tr>
+        <tr><td>6-10 photos</td><td class="comp-eur">€2.50/photo</td><td class="comp-gbp">£2</td></tr>
+        <tr><td>11-20 photos</td><td class="comp-eur">€2/photo</td><td class="comp-gbp">£1.70</td></tr>
+        <tr><td>21-33 photos</td><td class="comp-eur">€1.90/photo</td><td class="comp-gbp">£1.65</td></tr>
+        <tr><td>34+ photos</td><td class="comp-eur">€50 pkg</td><td class="comp-gbp">£42.50</td></tr>
+      </table>
+    </div>
+  </div>
 </div>
 <script>
   const HOTELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=0&single=true&output=csv';
-  const PGC_GID = '1637414386';
-  const PGC_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=' + PGC_GID + '&single=true&output=csv';
+  const PGC_URL    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=1637414386&single=true&output=csv';
   const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
   const COLOR = { blue:'#7ac3dd', yellow:'#fcd988', pink:'#f79f9d', green:'#a9d380' };
-
-  function hotelColor(b) {
-    b = parseFloat(b) || 0;
-    if (b <= 0)   return COLOR.blue;
-    if (b <= 100) return COLOR.yellow;
-    return COLOR.pink;
+  function hotelFill(b){ b=parseFloat(b)||0; return b<=0?COLOR.blue:b<=100?COLOR.yellow:COLOR.pink; }
+  function makeCircle(color,size){
+    return L.divIcon({className:'',
+      html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px '+color+'88;"></div>',
+      iconSize:[size,size],iconAnchor:[size/2,size/2]});
   }
-  function makeCircle(color, size) {
-    return L.divIcon({ className:'', html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px '+color+'88;"></div>', iconSize:[size,size], iconAnchor:[size/2,size/2] });
-  }
-
   const map = L.map('map',{zoomControl:true}).setView([48,10],4);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    {attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
   const hotelCluster = L.markerClusterGroup({chunkedLoading:true});
   const pgcLayer = L.layerGroup();
-  map.addLayer(hotelCluster);
-  map.addLayer(pgcLayer);
-
-  function showStatus(msg,bg){const el=document.getElementById('status-msg');el.textContent=msg;el.style.background=bg||'rgba(14,14,28,0.9)';el.style.display='block';}
+  map.addLayer(hotelCluster); map.addLayer(pgcLayer);
+  let allHotelMarkers=[], allPgcMarkers=[], pgcCount=0;
+  function showStatus(m,bg){const e=document.getElementById('status-msg');e.textContent=m;e.style.background=bg||'rgba(14,14,28,0.9)';e.style.display='block';}
   function hideStatus(){document.getElementById('status-msg').style.display='none';}
   function updateCount(h,p){document.getElementById('point-count').textContent=h+' hotel'+(h!==1?'s':'')+' · '+p+' destination'+(p!==1?'s':'');}
-
-  let hotelCount=0;
+  function applyFilters(){
+    hotelCluster.clearLayers();
+    const famOnly = document.getElementById('f-family').checked;
+    const season  = document.getElementById('f-season').value;
+    const recent  = parseInt(document.getElementById('f-recent').value)||0;
+    const now = new Date();
+    let shown=0;
+    allHotelMarkers.forEach(function(item){
+      let ok=true;
+      if(famOnly && !item.family) ok=false;
+      if(season && item.season && item.season!=='all' && item.season!==season) ok=false;
+      if(recent && item.dateAdded){
+        const d=new Date(item.dateAdded);
+        if(!isNaN(d)&&(now-d)/86400000>recent) ok=false;
+      }
+      if(ok){hotelCluster.addLayer(item.marker);shown++;}
+    });
+    updateCount(shown,pgcCount);
+  }
+  function resetFilters(){
+    document.getElementById('f-family').checked=false;
+    document.getElementById('f-season').value='';
+    document.getElementById('f-recent').value='';
+    applyFilters();
+  }
+  function showComp(type,el){
+    document.getElementById('comp-video').style.display=type==='video'?'block':'none';
+    document.getElementById('comp-photo').style.display=type==='photo'?'block':'none';
+    document.querySelectorAll('.comp-tab').forEach(function(t){t.classList.remove('active');});
+    el.classList.add('active');
+  }
   function loadHotels(){
     return new Promise(function(resolve){
       Papa.parse(HOTELS_URL,{download:true,header:true,skipEmptyLines:true,
@@ -89,16 +205,23 @@
             if(isNaN(lat)||isNaN(lng))return;
             const name=(row['Name']||'').trim();
             const loc=(row['Location']||row['City']||'').trim();
-            const fill=hotelColor(row['Budget Extra (€)']||row['Budget Extra']||0);
+            const fill=hotelFill(row['Budget Extra (€)']||row['Budget Extra']||0);
             const link=(row['Deal Link']||row['Link']||'').trim();
             const prev=(row['Link Preview']||'').trim();
+            const family=/yes|true|1/i.test(String(row['Family']||''));
+            const season=(row['Season']||'').toLowerCase().trim()||'all';
+            const dateAdded=(row['Date Added']||row['DateAdded']||'').trim();
+            let tags='';
+            if(family) tags+='<span class="popup-tag popup-family">Family</span>';
+            if(season&&season!=='all') tags+='<span class="popup-tag popup-season">'+(season==='summer'?'Summer':'Winter')+'</span>';
             let p='<b>'+name+'</b>';
             if(loc) p+='<br>'+loc;
-            if(prev) p+='<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;" />';
-            if(link) p+='<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal →</a>';
-            p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload ↗</a>';
-            hotelCluster.addLayer(L.marker([lat,lng],{icon:makeCircle(fill,12)}).bindPopup(p));
-            hotelCount++;
+            if(tags) p+='<br>'+tags;
+            if(prev) p+='<br><img src="'+prev+'" style="margin-top:6px;width:100%;border-radius:4px;"/>';
+            if(link) p+='<br><a href="'+(link.startsWith('http')?link:'https://'+link)+'" target="_blank">View Deal</a>';
+            p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload</a>';
+            const marker=L.marker([lat,lng],{icon:makeCircle(fill,12)}).bindPopup(p);
+            allHotelMarkers.push({marker,family,season,dateAdded});
           });
           resolve();
         },
@@ -106,8 +229,6 @@
       });
     });
   }
-
-  let pgcCount=0;
   function loadPGCOpenings(){
     return new Promise(function(resolve){
       Papa.parse(PGC_URL,{download:true,header:true,skipEmptyLines:true,
@@ -118,15 +239,17 @@
             if(isNaN(lat)||isNaN(lng))return;
             const dest=(row['Destination']||row['Name']||'').trim();
             const loc=(row['Location']||'').trim();
-            const deadline=(row['Deadline']||'').trim();
+            const dl=(row['Deadline']||'').trim();
             const notes=(row['Notes']||'').trim();
             const uplink=(row['Upload Link']||row['Upload']||'').trim();
             let p='<b>'+dest+'</b>';
             if(loc) p+='<br>'+loc;
-            if(deadline) p+='<br><span class="popup-deadline">📅 Deadline: '+deadline+'</span>';
+            if(dl)  p+='<br><span class="popup-tag popup-deadline">Deadline: '+dl+'</span>';
             if(notes) p+='<br><small style="color:#aaa;">'+notes+'</small>';
-            p+='<br><a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">Upload ↗</a>';
-            pgcLayer.addLayer(L.marker([lat,lng],{icon:makeCircle(COLOR.green,14)}).bindPopup(p));
+            p+='<br><a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">Upload</a>';
+            const marker=L.marker([lat,lng],{icon:makeCircle(COLOR.green,14)}).bindPopup(p);
+            allPgcMarkers.push(marker);
+            pgcLayer.addLayer(marker);
             pgcCount++;
           });
           resolve();
@@ -135,11 +258,10 @@
       });
     });
   }
-
   async function loadAll(){
-    showStatus('Loading map data…','rgba(122,195,221,0.2)');
+    showStatus('Loading map data...','rgba(122,195,221,0.15)');
     await Promise.all([loadHotels(),loadPGCOpenings()]);
-    updateCount(hotelCount,pgcCount);
+    applyFilters();
     hideStatus();
   }
   loadAll();
