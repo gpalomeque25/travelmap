@@ -2,105 +2,238 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>PGC Travel Map — Full Vision Demo</title>
+  <title>PGC Travel Map — DEMO</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; background: #141420; font-family: 'Open Sans', 'Segoe UI', sans-serif; }
-    #map { position: absolute; top: 44px; left: 0; right: 0; bottom: 0; }
-    #titlebar { position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 1000; background: rgba(14,14,28,0.97); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; padding: 0 18px; }
-    #titlebar h1 { font-size: 15px; font-weight: 700; color: #fff; }
-    #titlebar .sub { font-size: 12px; color: #666; }
-    .demo-badge { background: rgba(106,52,96,0.25); border: 1px solid rgba(106,52,96,0.6); color: #c080b4; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.8px; }
-    #point-count { margin-left: auto; font-size: 11px; color: #555; }
-    #legend { position: fixed; bottom: 28px; left: 14px; z-index: 1000; background: rgba(18,18,32,0.94); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 13px 16px; color: #fff; font-size: 12px; }
-    #legend h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #777; margin-bottom: 9px; font-weight: 700; }
-    .legend-item { display: flex; align-items: center; gap: 9px; margin-bottom: 6px; }
-    .legend-item:last-child { margin-bottom: 0; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-    .legend-label { color: #ccc; font-size: 12px; }
-    .legend-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
-    .leaflet-popup-content-wrapper { background: #1a1a30; color: #fff; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 6px 24px rgba(0,0,0,0.7); }
-    .leaflet-popup-tip { background: #1a1a30; }
-    .leaflet-popup-content { margin: 13px 15px; font-size: 13px; line-height: 1.5; min-width: 200px; }
-    .popup-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
-    .popup-location { color: #888; font-size: 12px; margin-bottom: 6px; }
-    .popup-preview { color: #bbb; font-size: 12px; margin-bottom: 8px; line-height: 1.4; }
-    .popup-deadline { color: #a9d380; font-weight: 700; font-size: 12px; margin-bottom: 8px; }
-    .popup-upload { display: inline-block; margin-top: 8px; padding: 5px 13px; border-radius: 5px; font-size: 12px; font-weight: 700; background: #a9d380; color: #1a1a2e; text-decoration: none; }
-    .popup-upload:hover { background: #c2e89f; }
-    .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; color: #555 !important; }
-    .leaflet-control-attribution a { color: #777 !important; }
-    .leaflet-control-zoom a { background: #1e1e32 !important; color: #aaa !important; border-color: #333 !important; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html,body { height:100%; background:#141420; font-family:'Open Sans','Segoe UI',sans-serif; color:#ccc; }
+    #titlebar { position:fixed; top:0; left:0; right:0; height:44px; z-index:1000;
+      background:rgba(14,14,28,0.97); border-bottom:1px solid rgba(255,255,255,0.08);
+      display:flex; align-items:center; gap:12px; padding:0 18px; }
+    #titlebar h1 { font-size:15px; font-weight:700; color:#fff; white-space:nowrap; }
+    #titlebar .sub { font-size:12px; color:#555; white-space:nowrap; }
+    .demo-badge { font-size:10px; font-weight:700; background:#fcd988; color:#141420;
+      padding:2px 8px; border-radius:3px; }
+    #point-count { margin-left:auto; font-size:13px; font-weight:600; color:#7ac3dd; white-space:nowrap; }
+    #map { position:absolute; top:44px; left:0; right:290px; bottom:0; }
+    #panel { position:fixed; top:44px; right:0; bottom:0; width:290px; z-index:999;
+      background:rgba(12,12,24,0.97); border-left:1px solid rgba(255,255,255,0.07);
+      overflow-y:auto; display:flex; flex-direction:column; gap:0; }
+    .p-section { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .p-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+      color:#444; margin-bottom:10px; }
+    .leg-row { display:flex; align-items:center; gap:9px; margin-bottom:7px; }
+    .leg-row:last-child { margin-bottom:0; }
+    .leg-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; border:2px solid rgba(255,255,255,0.4); }
+    .leg-label { font-size:12px; color:#bbb; }
+    .f-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
+    .f-row:last-child { margin-bottom:0; }
+    .f-label { font-size:12px; color:#aaa; }
+    .f-select { background:#1a1a2e; border:1px solid rgba(255,255,255,0.12); color:#ccc;
+      font-size:11px; padding:4px 7px; border-radius:5px; cursor:pointer; outline:none; }
+    .f-toggle { display:flex; align-items:center; gap:7px; cursor:pointer; }
+    .f-toggle input { accent-color:#a9d380; width:14px; height:14px; cursor:pointer; }
+    .btn-reset { font-size:11px; color:#555; background:none; border:1px solid rgba(255,255,255,0.1);
+      padding:3px 10px; border-radius:4px; cursor:pointer; margin-top:6px; width:100%; }
+    .btn-reset:hover { color:#aaa; border-color:rgba(255,255,255,0.25); }
+    .comp-tabs { display:flex; gap:6px; margin-bottom:10px; }
+    .comp-tab { flex:1; font-size:11px; font-weight:600; padding:5px 6px; border-radius:5px;
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color:#666; cursor:pointer; text-align:center; }
+    .comp-tab.active { background:rgba(122,195,221,0.15); border-color:#7ac3dd; color:#7ac3dd; }
+    .comp-table { width:100%; border-collapse:collapse; font-size:11px; }
+    .comp-table th { text-align:left; color:#555; font-weight:600; font-size:10px;
+      text-transform:uppercase; letter-spacing:.05em; padding:3px 0 6px; }
+    .comp-table td { padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04); color:#bbb; }
+    .comp-table td:last-child { text-align:right; color:#7ac3dd; font-weight:600; }
+    .comp-eur { color:#7ac3dd !important; }
+    .comp-gbp { color:#555 !important; font-size:10px; font-weight:400 !important; }
+    .leaflet-popup-content-wrapper { background:rgba(18,18,32,0.95); border:1px solid rgba(255,255,255,0.1);
+      border-radius:8px; color:#eee; font-family:'Open Sans',sans-serif; }
+    .leaflet-popup-tip { background:rgba(18,18,32,0.95); }
+    .leaflet-popup-content { font-size:13px; line-height:1.5; min-width:155px; }
+    .leaflet-popup-content b { color:#fff; font-size:14px; }
+    .leaflet-popup-content a { color:#7ac3dd; }
+    .popup-tag { display:inline-block; margin:2px 3px 2px 0; padding:1px 7px;
+      border-radius:3px; font-size:10px; font-weight:600; }
+    .popup-deadline { background:#a9d380; color:#141420; }
+    .popup-family   { background:#fcd988; color:#141420; }
+    .popup-season   { background:rgba(255,255,255,0.12); color:#ccc; }
+    .popup-upload { display:inline-block; margin-top:8px; padding:5px 12px;
+      border-radius:5px; font-size:12px; font-weight:600; background:#a9d380;
+      color:#141420; text-decoration:none; }
+    .popup-upload:hover { background:#c2e89f; }
+    .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div
+      { background-color:#7ac3dd; color:#141420; font-weight:700; }
+    .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large
+      { background-color:rgba(122,195,221,0.25); }
   </style>
 </head>
 <body>
-  <div id="titlebar">
-    <h1>🏴 PGC Travel Map</h1>
-    <span class="sub">Holiday Pirates · Partner-Generated Content</span>
-    <span class="demo-badge">DEMO</span>
-    <span id="point-count"></span>
+<div id="titlebar">
+  <h1>PGC Travel Map</h1>
+  <span class="demo-badge">DEMO</span>
+  <span class="sub">Holiday Pirates · Partner-Generated Content</span>
+  <span id="point-count"></span>
+</div>
+<div id="map"></div>
+<div id="panel">
+  <div class="p-section">
+    <div class="p-title">Legend</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#a9d380"></div><span class="leg-label">PGC Destination</span></div>
+    <div class="leg-row"><div class="leg-dot" style="background:#7ac3dd"></div><span class="leg-label">(S)PGC Hotel — no budget</span></div>
+    <div class="leg-row"><div class="leg-dot" style="background:#fcd988"></div><span class="leg-label">(S)PGC Hotel — low budget</span></div>
+    <div class="leg-row"><div class="leg-dot" style="background:#f79f9d"></div><span class="leg-label">(S)PGC Hotel — high budget</span></div>
   </div>
-  <div id="map"></div>
-  <div id="legend">
-    <h4>Map Legend</h4>
-    <div class="legend-item"><div class="legend-dot" style="background:#a9d380"></div><span class="legend-label">PGC Destination</span></div>
-    <hr class="legend-divider">
-    <div class="legend-item"><div class="legend-dot" style="background:#7ac3dd"></div><span class="legend-label">(S)PGC Hotel</span></div>
+  <div class="p-section">
+    <div class="p-title">Filters</div>
+    <div class="f-row">
+      <label class="f-toggle"><input type="checkbox" id="f-family" onchange="applyFilters()"><span class="f-label">Family deals only</span></label>
+    </div>
+    <div class="f-row">
+      <span class="f-label">Season</span>
+      <select class="f-select" id="f-season" onchange="applyFilters()">
+        <option value="">All seasons</option>
+        <option value="summer">Summer</option>
+        <option value="winter">Winter</option>
+      </select>
+    </div>
+    <div class="f-row">
+      <span class="f-label">Added</span>
+      <select class="f-select" id="f-recent" onchange="applyFilters()">
+        <option value="">All time</option>
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">Reset filters</button>
   </div>
-  <script>
-    const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
-    function hotelColor(b) {
-      if (b <= 0)   return { fill: '#7ac3dd' };
-      if (b <= 100) return { fill: '#fcd988' };
-      return               { fill: '#f79f9d' };
-    }
-    const DC = { fill: '#a9d380' };
-    const DEST = [
-      { name: 'Saturnia & Taormina', loc: 'Italy',          lat: 42.659, lng: 11.589, dl: '10.06.26', notes: 'Thermal springs + Sicily' },
-      { name: 'Catalonia Villages',  loc: 'Spain',          lat: 41.820, lng:  1.530, dl: '10.06.26', notes: 'Rural Catalonia' },
-      { name: 'Thailand',            loc: 'Southeast Asia', lat: 13.736, lng:100.523, dl: '15.06.26', notes: 'Beach + culture' },
-      { name: 'Lauterbrunnen',       loc: 'Switzerland',    lat: 46.595, lng:  7.908, dl: '17.06.26', notes: 'Valley of 72 waterfalls — scenic content' },
-    ];
-    const HOTELS = [
-      { name: 'Therme Erding',           loc: 'Erding, Germany',        lat: 48.306, lng: 11.908, budget: 0 },
-      { name: 'Jaz Soma Beach',          loc: 'Soma Bay, Egypt',        lat: 26.835, lng: 33.942, budget: 0 },
-      { name: 'Amare Beach Ibiza',       loc: 'Ibiza, Spain',           lat: 38.974, lng:  1.420, budget: 0 },
-      { name: 'Sunrise Tucana Resort',   loc: 'Sharm El Sheikh, Egypt', lat: 27.864, lng: 34.295, budget: 0 },
-      { name: 'Lopesan Baobab Resort',   loc: 'Gran Canaria, Spain',    lat: 27.760, lng:-15.567, budget: 0 },
-      { name: 'Allsun Esquinzo Beach',   loc: 'Fuerteventura, Spain',   lat: 28.074, lng:-14.308, budget: 0 },
-      { name: 'Club St George',          loc: 'Cyprus',                 lat: 34.680, lng: 32.900, budget: 0 },
-      { name: 'Titanic Hotel Liverpool', loc: 'Liverpool, UK',          lat: 53.407, lng: -2.992, budget: 100 },
-      { name: 'One Resort Premium',      loc: 'Hammamet, Tunisia',      lat: 36.401, lng: 10.557, budget: 100 },
-      { name: 'Fantasia Hotel de Luxe',  loc: 'Kusadasi, Turkey',       lat: 37.800, lng: 27.260, budget: 100 },
-      { name: 'Hotel Klosterhof Bayern', loc: 'Bavaria, Germany',       lat: 47.722, lng: 12.876, budget: 100 },
-      { name: 'Ananea Rocrita Kreta',    loc: 'Rethymno, Crete',        lat: 35.368, lng: 24.474, budget: 160 },
-      { name: 'Asia Gardens Alicante',   loc: 'Alicante, Spain',        lat: 38.344, lng: -0.488, budget: 160 },
-      { name: 'Maison de Reve Savoie',   loc: 'Savoie, France',         lat: 45.538, lng:  5.815, budget: 160 },
-      { name: 'Preidlhof Luxury Resort', loc: 'South Tyrol, Italy',     lat: 46.600, lng: 11.100, budget: 160 },
-    ];
-    const map = L.map('map').setView([42, 15], 4);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'OSM / CARTO', subdomains: 'abcd', maxZoom: 19 }).addTo(map);
-    DEST.forEach(function(d) {
-      const popup = '<div class="popup-name">'+d.name+'</div>'
-        +'<div class="popup-location">'+d.loc+'</div>'
-        +'<div class="popup-deadline">📅 Deadline: '+d.dl+'</div>'
-        +'<div class="popup-preview">'+d.notes+'</div>'
-        +'<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload ↗</a>';
-      L.circleMarker([d.lat,d.lng],{radius:10,fillColor:DC.fill,color:'rgba(255,255,255,0.3)',weight:2,fillOpacity:0.9})
-        .bindPopup(popup,{maxWidth:270}).addTo(map);
+  <div class="p-section">
+    <div class="p-title">PGC Compensation</div>
+    <div class="comp-tabs">
+      <div class="comp-tab active" onclick="showComp('video',this)">Video</div>
+      <div class="comp-tab" onclick="showComp('photo',this)">Photo</div>
+    </div>
+    <div id="comp-video">
+      <table class="comp-table">
+        <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
+        <tr><td>1-2 videos</td><td class="comp-eur">14/video</td><td class="comp-gbp">12</td></tr>
+        <tr><td>3-8 videos</td><td class="comp-eur">12/video</td><td class="comp-gbp">10</td></tr>
+        <tr><td>9-15 videos</td><td class="comp-eur">120 pkg</td><td class="comp-gbp">105</td></tr>
+        <tr><td>16-30 videos</td><td class="comp-eur">160 pkg</td><td class="comp-gbp">140</td></tr>
+        <tr><td>30+ videos</td><td class="comp-eur">200 pkg</td><td class="comp-gbp">175</td></tr>
+      </table>
+    </div>
+    <div id="comp-photo" style="display:none">
+      <table class="comp-table">
+        <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
+        <tr><td>1-2 photos</td><td class="comp-eur">4/photo</td><td class="comp-gbp">3.50</td></tr>
+        <tr><td>3-5 photos</td><td class="comp-eur">3.50/photo</td><td class="comp-gbp">3</td></tr>
+        <tr><td>6-10 photos</td><td class="comp-eur">2.50/photo</td><td class="comp-gbp">2</td></tr>
+        <tr><td>11-20 photos</td><td class="comp-eur">2/photo</td><td class="comp-gbp">1.70</td></tr>
+        <tr><td>21-33 photos</td><td class="comp-eur">1.90/photo</td><td class="comp-gbp">1.65</td></tr>
+        <tr><td>34+ photos</td><td class="comp-eur">50 pkg</td><td class="comp-gbp">42.50</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+  const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
+  const COLOR = { blue:'#7ac3dd', yellow:'#fcd988', pink:'#f79f9d', green:'#a9d380' };
+  const now = new Date();
+  function daysAgo(n){ const d=new Date(now); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
+  const HOTELS = [
+    { name:'Therme Erding', loc:'Bavaria, Germany', lat:48.289, lng:11.904, budget:0, family:true, season:'all', added:daysAgo(5) },
+    { name:'Lopesan Baobab Resort', loc:'Gran Canaria, Spain', lat:27.747, lng:-15.578, budget:50, family:true, season:'summer', added:daysAgo(8) },
+    { name:'Hotel Krumers Alpin', loc:'Seefeld, Austria', lat:47.329, lng:11.185, budget:0, family:false, season:'winter', added:daysAgo(12) },
+    { name:'Valamar Lacroma Dubrovnik', loc:'Dubrovnik, Croatia', lat:42.642, lng:18.107, budget:120, family:false, season:'summer', added:daysAgo(15) },
+    { name:'Radisson Blu Marseille', loc:'Marseille, France', lat:43.296, lng:5.381, budget:0, family:false, season:'all', added:daysAgo(20) },
+    { name:'Rixos Sungate', loc:'Antalya, Turkey', lat:36.526, lng:30.555, budget:80, family:true, season:'summer', added:daysAgo(22) },
+    { name:'Kempinski Hotel Berchtesgaden', loc:'Bavaria, Germany', lat:47.630, lng:13.001, budget:0, family:false, season:'winter', added:daysAgo(25) },
+    { name:'Gran Melia de Mar', loc:'Mallorca, Spain', lat:39.555, lng:2.631, budget:150, family:false, season:'summer', added:daysAgo(3) },
+    { name:'Falkensteiner Falkensteiner Hotel Carinzia', loc:'Carinthia, Austria', lat:46.614, lng:13.823, budget:0, family:true, season:'winter', added:daysAgo(18) },
+    { name:'Concorde De Luxe Resort', loc:'Antalya, Turkey', lat:36.888, lng:30.695, budget:90, family:true, season:'summer', added:daysAgo(10) },
+    { name:'TUI Blue Adriatic Beach', loc:'Split, Croatia', lat:43.508, lng:16.440, budget:60, family:false, season:'summer', added:daysAgo(28) },
+    { name:'Strandhotel Borkum', loc:'Borkum, Germany', lat:53.594, lng:6.685, budget:0, family:true, season:'summer', added:daysAgo(6) },
+    { name:'Dorint Hotel Hamburg', loc:'Hamburg, Germany', lat:53.553, lng:9.992, budget:0, family:false, season:'all', added:daysAgo(45) },
+    { name:'Ikos Olivia', loc:'Halkidiki, Greece', lat:40.350, lng:23.090, budget:200, family:true, season:'summer', added:daysAgo(2) },
+    { name:'Falkensteiner Hotel Montafon', loc:'Vorarlberg, Austria', lat:47.063, lng:9.874, budget:0, family:false, season:'winter', added:daysAgo(35) }
+  ];
+  const DEST = [
+    { name:'Saturnia and Taormina', loc:'Italy', lat:42.659, lng:11.589, dl:'10.06.26', notes:'Thermal springs and Sicily coastal content' },
+    { name:'Catalonia Villages', loc:'Spain', lat:41.820, lng:1.530, dl:'10.06.26', notes:'Rural Catalonia villages and nature' },
+    { name:'Thailand', loc:'Southeast Asia', lat:13.736, lng:100.523, dl:'15.06.26', notes:'Beach and cultural experiences' },
+    { name:'Lauterbrunnen', loc:'Switzerland', lat:46.595, lng:7.908, dl:'17.06.26', notes:'Valley of 72 waterfalls scenic content' }
+  ];
+  function makeCircle(color,size){
+    return L.divIcon({className:'',
+      html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px '+color+'88;"></div>',
+      iconSize:[size,size],iconAnchor:[size/2,size/2]});
+  }
+  function hotelColor(b){ return b<=0?COLOR.blue:b<=100?COLOR.yellow:COLOR.pink; }
+  const map = L.map('map',{zoomControl:true}).setView([48,10],4);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    {attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+  const hotelCluster = L.markerClusterGroup({chunkedLoading:true});
+  const pgcLayer = L.layerGroup();
+  map.addLayer(hotelCluster); map.addLayer(pgcLayer);
+  let allHotelMarkers=[];
+  HOTELS.forEach(function(h){
+    let tags='';
+    if(h.family) tags+='<span class="popup-tag popup-family">Family</span>';
+    if(h.season&&h.season!=='all') tags+='<span class="popup-tag popup-season">'+(h.season==='summer'?'Summer':'Winter')+'</span>';
+    let p='<b>'+h.name+'</b><br>'+h.loc;
+    if(tags) p+='<br>'+tags;
+    p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload</a>';
+    const marker=L.marker([h.lat,h.lng],{icon:makeCircle(hotelColor(h.budget),12)}).bindPopup(p);
+    allHotelMarkers.push({marker,family:h.family,season:h.season,dateAdded:h.added});
+  });
+  DEST.forEach(function(d){
+    let p='<b>'+d.name+'</b><br>'+d.loc;
+    if(d.dl) p+='<br><span class="popup-tag popup-deadline">Deadline: '+d.dl+'</span>';
+    if(d.notes) p+='<br><small style="color:#aaa;">'+d.notes+'</small>';
+    p+='<br><a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload</a>';
+    pgcLayer.addLayer(L.marker([d.lat,d.lng],{icon:makeCircle(COLOR.green,14)}).bindPopup(p));
+  });
+  function updateCount(h){ document.getElementById('point-count').textContent=h+' hotels · '+DEST.length+' destinations'; }
+  function applyFilters(){
+    hotelCluster.clearLayers();
+    const famOnly=document.getElementById('f-family').checked;
+    const season=document.getElementById('f-season').value;
+    const recent=parseInt(document.getElementById('f-recent').value)||0;
+    let shown=0;
+    allHotelMarkers.forEach(function(item){
+      let ok=true;
+      if(famOnly&&!item.family) ok=false;
+      if(season&&item.season!=='all'&&item.season!==season) ok=false;
+      if(recent&&item.dateAdded){
+        const d=new Date(item.dateAdded);
+        if(!isNaN(d)&&(now-d)/86400000>recent) ok=false;
+      }
+      if(ok){hotelCluster.addLayer(item.marker);shown++;}
     });
-    HOTELS.forEach(function(h) {
-      const c = hotelColor(h.budget);
-      const popup = '<div class="popup-name">'+h.name+'</div>'
-        +'<div class="popup-location">'+h.loc+'</div>'
-        +'<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">Upload ↗</a>';
-      L.circleMarker([h.lat,h.lng],{radius:h.budget>=160?9:h.budget>=100?8:7,fillColor:c.fill,color:'rgba(255,255,255,0.2)',weight:1.5,fillOpacity:0.88})
-        .bindPopup(popup,{maxWidth:270}).addTo(map);
-    });
-    document.getElementById('point-count').textContent = DEST.length + ' destinations · ' + HOTELS.length + ' hotels';
-  </script>
+    updateCount(shown);
+  }
+  function resetFilters(){
+    document.getElementById('f-family').checked=false;
+    document.getElementById('f-season').value='';
+    document.getElementById('f-recent').value='';
+    applyFilters();
+  }
+  function showComp(type,el){
+    document.getElementById('comp-video').style.display=type==='video'?'block':'none';
+    document.getElementById('comp-photo').style.display=type==='photo'?'block':'none';
+    document.querySelectorAll('.comp-tab').forEach(function(t){t.classList.remove('active');});
+    el.classList.add('active');
+  }
+  applyFilters();
+</script>
 </body>
 </html>
