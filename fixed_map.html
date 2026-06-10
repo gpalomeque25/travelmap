@@ -74,6 +74,23 @@
       padding:3px 10px; border-radius:4px; cursor:pointer; margin-top:6px; width:100%; }
     .btn-reset:hover { color:#aaa; border-color:rgba(255,255,255,0.25); }
 
+    /* PGC Compensation card */
+    .comp-toggle { display:flex; gap:8px; margin-bottom:12px; }
+    .comp-btn { flex:1; padding:7px 0; font-size:12px; font-weight:700; text-align:center; cursor:pointer;
+      background:none; border:1px solid rgba(255,255,255,0.14); border-radius:7px; color:#888;
+      font-family:inherit; transition:all .15s; }
+    .comp-btn.active { color:#7ac3dd; border-color:rgba(122,195,221,0.65); background:rgba(122,195,221,0.07); }
+    .comp-btn:hover { border-color:rgba(255,255,255,0.3); }
+    .comp-btn.active:hover { border-color:#7ac3dd; }
+    .comp-table { width:100%; border-collapse:collapse; }
+    .comp-table th { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+      color:#555; text-align:left; padding:0 0 7px; }
+    .comp-table th:last-child, .comp-table td:last-child { text-align:right; }
+    .comp-table td { font-size:12px; padding:5px 0; border-top:1px solid rgba(255,255,255,0.05); }
+    .comp-assets { color:#ccc; }
+    .comp-eur { color:#7ac3dd; font-weight:600; }
+    .comp-gbp { color:#666; }
+
     /* Popups */
     .leaflet-popup-content-wrapper { background:rgba(18,18,34,0.97); border:1px solid rgba(255,255,255,0.13);
       border-radius:10px; color:#eee; font-family:'Open Sans',sans-serif; box-shadow:0 4px 20px rgba(0,0,0,.6); }
@@ -154,12 +171,40 @@
     </div>
     <button class="btn-reset" onclick="resetAll()">&#8634; Reset all</button>
   </div>
+
+  <!-- PGC Compensation -->
+  <div class="p-section">
+    <div class="p-title">PGC Compensation</div>
+    <div class="comp-toggle">
+      <button class="comp-btn active" id="comp-btn-video" onclick="showComp('video')">&#128249; Video</button>
+      <button class="comp-btn" id="comp-btn-photo" onclick="showComp('photo')">&#128247; Photo</button>
+    </div>
+    <table class="comp-table" id="comp-video">
+      <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
+      <tr><td class="comp-assets">1&#8211;2 videos</td><td class="comp-eur">&euro;14/video</td><td class="comp-gbp">&pound;12</td></tr>
+      <tr><td class="comp-assets">3&#8211;8 videos</td><td class="comp-eur">&euro;12/video</td><td class="comp-gbp">&pound;10</td></tr>
+      <tr><td class="comp-assets">9&#8211;15 videos</td><td class="comp-eur">&euro;120 pkg</td><td class="comp-gbp">&pound;105</td></tr>
+      <tr><td class="comp-assets">16&#8211;30 videos</td><td class="comp-eur">&euro;160 pkg</td><td class="comp-gbp">&pound;140</td></tr>
+      <tr><td class="comp-assets">30+ videos</td><td class="comp-eur">&euro;200 pkg</td><td class="comp-gbp">&pound;175</td></tr>
+    </table>
+    <table class="comp-table" id="comp-photo" style="display:none">
+      <tr><th>Assets</th><th>EUR</th><th>GBP</th></tr>
+      <tr><td class="comp-assets">1&#8211;2 photos</td><td class="comp-eur">&euro;4/photo</td><td class="comp-gbp">&pound;3.50</td></tr>
+      <tr><td class="comp-assets">3&#8211;5 photos</td><td class="comp-eur">&euro;3.50/photo</td><td class="comp-gbp">&pound;3</td></tr>
+      <tr><td class="comp-assets">6&#8211;10 photos</td><td class="comp-eur">&euro;2.50/photo</td><td class="comp-gbp">&pound;2</td></tr>
+      <tr><td class="comp-assets">11&#8211;20 photos</td><td class="comp-eur">&euro;2/photo</td><td class="comp-gbp">&pound;1.70</td></tr>
+      <tr><td class="comp-assets">21&#8211;33 photos</td><td class="comp-eur">&euro;1.90/photo</td><td class="comp-gbp">&pound;1.65</td></tr>
+      <tr><td class="comp-assets">34+ photos</td><td class="comp-eur">&euro;50 pkg</td><td class="comp-gbp">&pound;42.50</td></tr>
+    </table>
+  </div>
 </div>
 
 <script>
   // ════════════════════════════════════════════════════════════════
-  // CONFIG — audience switches. THIS IS THE COLLEAGUES (company) FILE:
-  // budget tiers and PGC compensation rates are NOT rendered.
+  // CONFIG — audience switches. THIS IS THE CURRENT LIVE FILE:
+  // budget tiers are NOT rendered (not approved yet — only diff vs demo).
+  // PGC compensation rates ARE shown (2026-06-10). When the audience
+  // versions go live, the compensation card moves to map_creators.html.
   // ════════════════════════════════════════════════════════════════
   const SHOW_BUDGET = false;        // false = all hotels one color, no budget legend
   const HOTELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=0&single=true&output=csv';
@@ -227,7 +272,15 @@
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     {attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
 
-  const hotelCluster = L.markerClusterGroup({chunkedLoading:true});
+  // Cluster tuning: smaller radius + hard stop at zoom 9 so individual
+  // places appear much earlier (588 hotels stayed clustered too deep before)
+  const hotelCluster = L.markerClusterGroup({
+    chunkedLoading:true,
+    maxClusterRadius:45,
+    disableClusteringAtZoom:9,
+    spiderfyOnMaxZoom:true,
+    showCoverageOnHover:false
+  });
   const pgcLayer = L.layerGroup();
   map.addLayer(hotelCluster); map.addLayer(pgcLayer);
 
@@ -343,6 +396,13 @@
         error:function(e){console.error(e);resolve();}
       });
     });
+  }
+
+  function showComp(which){
+    document.getElementById('comp-video').style.display = which==='video' ? '' : 'none';
+    document.getElementById('comp-photo').style.display = which==='photo' ? '' : 'none';
+    document.getElementById('comp-btn-video').classList.toggle('active', which==='video');
+    document.getElementById('comp-btn-photo').classList.toggle('active', which==='photo');
   }
 
   function togglePanel(){
