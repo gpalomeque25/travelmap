@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" />
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; 
+    * { margin:0; padding:0; box-sizing:border-box;
     html,body { height:100%; background:#141420; font-family:'Open Sans','Segoe UI',sans-serif; color:#ccc; }
     /* ── Titlebar ── */
     #titlebar { position:fixed; top:0; left:0; right:0; height:46px; z-index:1000;
@@ -141,6 +141,10 @@
       <div class="leg-dot" style="background:#7ac3dd"></div>
       <span class="leg-label">(S)PGC Hotel</span>
     </div>
+    <div class="leg-row" id="leg-mission" onclick="toggleLegend('mission')">
+      <div class="leg-dot" style="background:#ff9800"></div>
+      <span class="leg-label">SPGC Mission</span>
+    </div>
     <div class="leg-hint">Click any row to toggle visibility</div>
   </div>
 
@@ -200,19 +204,25 @@
 
 <script>
   // ════════════════════════════════════════════════════════════════
-  // CONFIG — audience switches. THIS IS THE CURRENT LIVE FILE:
-  // budget tiers are NOT rendered (not approved yet — only diff vs demo).
-  // PGC compensation rates ARE shown (2026-06-10). When the audience
-  // versions go live, the compensation card moves to map_creators.html.
+  // CONFIG — audience switches. Budget tiers are NOT rendered (not
+  // approved yet — only diff vs demo). PGC compensation rates ARE
+  // shown (2026-06-10). When the audience versions go live, the
+  // compensation card moves to map_creators.html.
+  //
+  // 2026-07-13: single source now. The "Combined" tab (gid=316159971)
+  // aggregates Top Resorts-places / PGC Openings / Form Responses 1 /
+  // SPGC Openings and tags every row with a Category (hotel/pgc/mission).
+  // The old separate PGC-Openings-only fetch (gid=1637414386) was
+  // dropped — Combined already carries those same rows as Category=pgc,
+  // so keeping both was double-plotting PGC destinations.
   // ════════════════════════════════════════════════════════════════
   const SHOW_BUDGET = false;        // false = all hotels one color, no budget legend
-  const HOTELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=316159971&single=true&output=csv';
-  const PGC_URL    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=1637414386&single=true&output=csv';
+  const COMBINED_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVaW9Ob_dKfnVAbCZ-I3PDKlInuK52WNU72v4AAmyZhVI50mZbgqy7ay561odtImwmG-92_F_S-KUX/pub?gid=316159971&single=true&output=csv';
   const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
-  const COLOR = { blue:'#7ac3dd', yellow:'#fcd988', pink:'#f79f9d', green:'#a9d380' };
+  const COLOR = { blue:'#7ac3dd', yellow:'#fcd988', pink:'#f79f9d', green:'#a9d380', mission:'#ff9800' };
 
   // Legend toggle state
-  const showTypes = { green:true, blue:true, yellow:true, pink:true };
+  const showTypes = { green:true, blue:true, yellow:true, pink:true, mission:true };
 
   // Robust header lookup: sheet headers sometimes carry stray spaces/tabs
   function getCol(row, name) {
@@ -252,6 +262,9 @@
     if (type === 'green') {
       allPgcMarkers.forEach(function(m){ showTypes.green ? pgcLayer.addLayer(m) : pgcLayer.removeLayer(m); });
       updateCount();
+    } else if (type === 'mission') {
+      allMissionMarkers.forEach(function(m){ showTypes.mission ? missionLayer.addLayer(m) : missionLayer.removeLayer(m); });
+      updateCount();
     } else {
       applyFilters();
     }
@@ -281,9 +294,10 @@
     showCoverageOnHover:false
   });
   const pgcLayer = L.layerGroup();
-  map.addLayer(hotelCluster); map.addLayer(pgcLayer);
+  const missionLayer = L.layerGroup();
+  map.addLayer(hotelCluster); map.addLayer(pgcLayer); map.addLayer(missionLayer);
 
-  let allHotelMarkers=[], allPgcMarkers=[], pgcCount=0;
+  let allHotelMarkers=[], allPgcMarkers=[], allMissionMarkers=[], pgcCount=0, missionCount=0;
 
   function showStatus(m,bg){const e=document.getElementById('status-msg');e.textContent=m;e.style.background=bg||'rgba(14,14,28,0.9)';e.style.display='block';}
   function hideStatus(){document.getElementById('status-msg').style.display='none';}
@@ -291,7 +305,8 @@
   function updateCount(shownHotels) {
     const h = (shownHotels !== undefined) ? shownHotels : allHotelMarkers.filter(i => hotelCluster.hasLayer(i.marker)).length;
     const p = showTypes.green ? pgcCount : 0;
-    document.getElementById('point-count').textContent = h+' hotel'+(h!==1?'s':'')+' · '+p+' destination'+(p!==1?'s':'');
+    const m = showTypes.mission ? missionCount : 0;
+    document.getElementById('point-count').textContent = h+' hotel'+(h!==1?'s':'')+' · '+p+' destination'+(p!==1?'s':'')+' · '+m+' mission'+(m!==1?'s':'');
   }
 
   function applyFilters(){
@@ -319,28 +334,60 @@
     document.getElementById('f-family').checked=false;
     document.getElementById('f-season').value='';
     document.getElementById('f-recent').value='';
-    ['green','blue','yellow','pink'].forEach(function(t){
+    ['green','blue','yellow','pink','mission'].forEach(function(t){
       showTypes[t]=true;
       const el=document.getElementById('leg-'+t);
       if (el) el.classList.remove('leg-off');
     });
     allPgcMarkers.forEach(function(m){ pgcLayer.addLayer(m); });
+    allMissionMarkers.forEach(function(m){ missionLayer.addLayer(m); });
     applyFilters();
   }
 
-  function loadHotels(){
+  // Single source: Combined tab. Buckets every row by Category
+  // (hotel/pgc/mission — blank defaults to hotel, matching rebuildCombined.gs).
+  function loadCombined(){
     return new Promise(function(resolve){
-      Papa.parse(HOTELS_URL,{download:true,header:true,skipEmptyLines:true,
+      Papa.parse(COMBINED_URL,{download:true,header:true,skipEmptyLines:true,
         complete:function(r){
           r.data.forEach(function(row){
             const lat=parseFloat(row['Latitude']),lng=parseFloat(row['Longitude']);
             if(isNaN(lat)||isNaN(lng))return;
             const name=getCol(row,'Name');
+            if(!name) return;
             const loc=getCol(row,'Location')||getCol(row,'City');
+            const deadline=getCol(row,'Deadline');
+            const link=getCol(row,'Deal Link')||getCol(row,'Link');
+            const category=(getCol(row,'Category')||'hotel').toLowerCase();
+
+            if (category === 'pgc') {
+              let p='<b>'+name+'</b>';
+              if(loc) p+='<br>'+loc;
+              if(deadline) p+='<br><span class="popup-tag popup-deadline">📅 Deadline: '+deadline+'</span>';
+              p+='<a class="popup-upload" href="'+(link||UPLOAD_URL)+'" target="_blank">↗ Upload to Canto</a>';
+              const marker=L.marker([lat,lng],{icon:makeCircle('green',14)}).bindPopup(p);
+              allPgcMarkers.push(marker);
+              pgcLayer.addLayer(marker);
+              pgcCount++;
+              return;
+            }
+
+            if (category === 'mission') {
+              let p='<b>'+name+'</b>';
+              if(loc) p+='<br>'+loc;
+              if(deadline) p+='<br><span class="popup-tag popup-deadline">📅 Deadline: '+deadline+'</span>';
+              if(link) p+='<br><a class="view-deal" href="'+(link.indexOf('http')===0?link:'https://'+link)+'" target="_blank">View reference →</a>';
+              p+='<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">↗ Upload to Canto</a>';
+              const marker=L.marker([lat,lng],{icon:makeCircle('mission',13)}).bindPopup(p);
+              allMissionMarkers.push(marker);
+              missionLayer.addLayer(marker);
+              missionCount++;
+              return;
+            }
+
+            // default: hotel
             const budgetRaw = SHOW_BUDGET ? getColLike(row,'budget extra') : 0;
             const colorType=hotelColor(budgetRaw);
-            const link=getCol(row,'Deal Link')||getCol(row,'Link');
-            // Image column (filled by the Apps Script) first, then Link Preview as fallback
             const img=getCol(row,'Image')||getUrlColLike(row,'preview');
             const family=/yes|true|1/i.test(String(row['Family']||''));
             const season=(getCol(row,'Season')||'').toLowerCase()||'all';
@@ -359,36 +406,6 @@
 
             const marker=L.marker([lat,lng],{icon:makeCircle(colorType,12)}).bindPopup(p);
             allHotelMarkers.push({marker,family,season,dateAdded,colorType});
-          });
-          resolve();
-        },
-        error:function(e){console.error(e);resolve();}
-      });
-    });
-  }
-
-  function loadPGCOpenings(){
-    return new Promise(function(resolve){
-      Papa.parse(PGC_URL,{download:true,header:true,skipEmptyLines:true,
-        complete:function(r){
-          r.data.forEach(function(row){
-            const lat=parseFloat(row['Lat']||row['Latitude']);
-            const lng=parseFloat(row['Lng']||row['Longitude']);
-            if(isNaN(lat)||isNaN(lng))return;
-            const dest=(row['Destination']||row['Name']||'').trim();
-            const loc=(row['Location']||'').trim();
-            const dl=(row['Deadline']||'').trim();
-            const notes=(row['Notes']||'').trim();
-            const uplink=(row['Upload Link']||row['Upload']||'').trim();
-            let p='<b>'+dest+'</b>';
-            if(loc) p+='<br>'+loc;
-            if(dl)  p+='<br><span class="popup-tag popup-deadline">📅 Deadline: '+dl+'</span>';
-            if(notes) p+='<br><small style="color:#aaa;">'+notes+'</small>';
-            p+='<a class="popup-upload" href="'+(uplink||UPLOAD_URL)+'" target="_blank">↗ Upload to Canto</a>';
-            const marker=L.marker([lat,lng],{icon:makeCircle('green',14)}).bindPopup(p);
-            allPgcMarkers.push(marker);
-            pgcLayer.addLayer(marker);
-            pgcCount++;
           });
           resolve();
         },
@@ -437,6 +454,10 @@
       const pb = L.featureGroup(allPgcMarkers).getBounds();
       b = b && b.isValid() ? b.extend(pb) : pb;
     }
+    if (allMissionMarkers.length) {
+      const mb = L.featureGroup(allMissionMarkers).getBounds();
+      b = b && b.isValid() ? b.extend(mb) : mb;
+    }
     if (b && b.isValid()) map.fitBounds(b, { padding:[40,40], maxZoom:7 });
   }
   [250, 800, 2000].forEach(function(ms){ setTimeout(function(){ map.invalidateSize(); }, ms); });
@@ -444,7 +465,7 @@
 
   async function loadAll(){
     showStatus('Loading map data…','rgba(122,195,221,0.15)');
-    await Promise.all([loadHotels(),loadPGCOpenings()]);
+    await loadCombined();
     applyFilters();
     fitToData();
     hideStatus();
