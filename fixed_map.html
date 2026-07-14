@@ -361,7 +361,12 @@
   // (hotel/pgc/mission — blank defaults to hotel, matching rebuildCombined.gs).
   function loadCombined(){
     return new Promise(function(resolve){
-      Papa.parse(COMBINED_URL,{download:true,header:true,skipEmptyLines:true,
+      // Cache-bust: Google's publish-to-web CSV endpoint caches by exact URL,
+      // so without a changing param the map can keep serving stale data for
+      // several minutes after a real edit (bit us during dev -- Ger edits the
+      // sheet and expects the map to reflect it right away on reload).
+      const cacheBustedUrl = COMBINED_URL + '&cachebust=' + Date.now();
+      Papa.parse(cacheBustedUrl,{download:true,header:true,skipEmptyLines:true,
         complete:function(r){
           r.data.forEach(function(row){
             const lat=parseFloat(row['Latitude']),lng=parseFloat(row['Longitude']);
