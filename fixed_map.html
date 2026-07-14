@@ -221,6 +221,19 @@
   const UPLOAD_URL = 'https://holidaypirates.canto.global/u/u-e8b306b753dd40b29a62e29ba52dd122_2adaf097816b4969b8158f670ef1d2d5?viewIndex=0';
   const COLOR = { blue:'#7ac3dd', yellow:'#fcd988', pink:'#f79f9d', green:'#a9d380', mission:'#ff9800' };
 
+  // "Anywhere" missions get geocoded (by geocodeMissions.gs) to a tight jittered
+  // cluster around Point Nemo — the ocean point farthest from any coastline —
+  // instead of stacking on top of each other in one city. A sailboat landmark
+  // marks the spot; those points are excluded from fitToData()'s bounds so the
+  // default view stays Europe-centered instead of zooming out to the Pacific.
+  const BOAT_LAT = -48.8767, BOAT_LNG = -123.3933;
+  function isNearBoat(lat, lng){ return Math.abs(lat - BOAT_LAT) < 5 && Math.abs(lng - BOAT_LNG) < 5; }
+  function makeEmojiIcon(emoji, size){
+    return L.divIcon({className:'',
+      html:'<div style="font-size:'+size+'px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7));">'+emoji+'</div>',
+      iconSize:[size,size], iconAnchor:[size/2,size/2]});
+  }
+
   // Legend toggle state
   const showTypes = { green:true, blue:true, yellow:true, pink:true, mission:true };
 
@@ -297,7 +310,7 @@
   const missionLayer = L.layerGroup();
   map.addLayer(hotelCluster); map.addLayer(pgcLayer); map.addLayer(missionLayer);
 
-  let allHotelMarkers=[], allPgcMarkers=[], allMissionMarkers=[], pgcCount=0, missionCount=0;
+  let allHotelMarkers=[], allPgcMarkers=[], allMissionMarkers=[], missionBoundsMarkers=[], pgcCount=0, missionCount=0;
 
   function showStatus(m,bg){const e=document.getElementById('status-msg');e.textContent=m;e.style.background=bg||'rgba(14,14,28,0.9)';e.style.display='block';}
   function hideStatus(){document.getElementById('status-msg').style.display='none';}
@@ -358,13 +371,14 @@
             const loc=getCol(row,'Location')||getCol(row,'City');
             const deadline=getCol(row,'Deadline');
             const link=getCol(row,'Deal Link')||getCol(row,'Link');
+            const uploadLink=getCol(row,'Upload Link');
             const category=(getCol(row,'Category')||'hotel').toLowerCase();
 
             if (category === 'pgc') {
               let p='<b>'+name+'</b>';
               if(loc) p+='<br>'+loc;
               if(deadline) p+='<br><span class="popup-tag popup-deadline">📅 Deadline: '+deadline+'</span>';
-              p+='<a class="popup-upload" href="'+(link||UPLOAD_URL)+'" target="_blank">↗ Upload to Canto</a>';
+              p+='<a class="popup-upload" href="'+(uploadLink||UPLOAD_URL)+'" target="_blank">↗ Upload to Canto</a>';
               const marker=L.marker([lat,lng],{icon:makeCircle('green',14)}).bindPopup(p);
               allPgcMarkers.push(marker);
               pgcLayer.addLayer(marker);
@@ -377,11 +391,12 @@
               if(loc) p+='<br>'+loc;
               if(deadline) p+='<br><span class="popup-tag popup-deadline">📅 Deadline: '+deadline+'</span>';
               if(link) p+='<br><a class="view-deal" href="'+(link.indexOf('http')===0?link:'https://'+link)+'" target="_blank">View reference →</a>';
-              p+='<a class="popup-upload" href="'+UPLOAD_URL+'" target="_blank">↗ Upload to Canto</a>';
+              p+='<a class="popup-upload" href="'+(uploadLink||UPLOAD_URL)+'" target="_blank">↗ Upload to Canto</a>';
               const marker=L.marker([lat,lng],{icon:makeCircle('mission',13)}).bindPopup(p);
               allMissionMarkers.push(marker);
               missionLayer.addLayer(marker);
               missionCount++;
+              if (!isNearBoat(lat,lng)) missionBoundsMarkers.push(marker);
               return;
             }
 
@@ -407,6 +422,15 @@
             const marker=L.marker([lat,lng],{icon:makeCircle(colorType,12)}).bindPopup(p);
             allHotelMarkers.push({marker,family,season,dateAdded,colorType});
           });
+
+          // Sailboat landmark at Point Nemo — a visual anchor for the jittered
+          // "Anywhere" mission cluster. Part of the mission legend/filter group
+          // but never counted in missionCount or fitToData()'s bounds.
+          const boatMarker = L.marker([BOAT_LAT, BOAT_LNG], {icon: makeEmojiIcon('⛵', 26)})
+            .bindPopup('<b>⛵ Missions without a fixed location</b><br>These content ideas can be shot anywhere — the nearby pins are the individual missions.');
+          allMissionMarkers.push(boatMarker);
+          missionLayer.addLayer(boatMarker);
+
           resolve();
         },
         error:function(e){console.error(e);resolve();}
@@ -454,8 +478,8 @@
       const pb = L.featureGroup(allPgcMarkers).getBounds();
       b = b && b.isValid() ? b.extend(pb) : pb;
     }
-    if (allMissionMarkers.length) {
-      const mb = L.featureGroup(allMissionMarkers).getBounds();
+    if (missionBoundsMarkers.length) {
+      const mb = L.featureGroup(missionBoundsMarkers).getBounds();
       b = b && b.isValid() ? b.extend(mb) : mb;
     }
     if (b && b.isValid()) map.fitBounds(b, { padding:[40,40], maxZoom:7 });
