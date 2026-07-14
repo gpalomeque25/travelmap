@@ -268,6 +268,20 @@
     return '';
   }
 
+  // PGC destination deadlines are entered as "DD.MM" (no year, current year
+  // implied -- confirmed by checking the raw sheet cell format). A destination
+  // stays visible through its deadline day and disappears from the map the
+  // day after, per Ger's rule ("deadline passed -> no longer visible").
+  function isPgcDeadlinePassed(deadlineStr) {
+    if (!deadlineStr) return false;
+    const m = /^(\d{1,2})\.(\d{1,2})$/.exec(String(deadlineStr).trim());
+    if (!m) return false; // unrecognized format -> don't hide, fail safe
+    const day = parseInt(m[1], 10), month = parseInt(m[2], 10);
+    const now = new Date();
+    const deadlineEnd = new Date(now.getFullYear(), month - 1, day, 23, 59, 59, 999);
+    return now.getTime() > deadlineEnd.getTime();
+  }
+
   function toggleLegend(type) {
     showTypes[type] = !showTypes[type];
     const el = document.getElementById('leg-'+type);
@@ -380,6 +394,7 @@
             const category=(getCol(row,'Category')||'hotel').toLowerCase();
 
             if (category === 'pgc') {
+              if (isPgcDeadlinePassed(deadline)) return; // deadline day + 1 -> drop from the map entirely
               let p='<b>'+name+'</b>';
               if(loc) p+='<br>'+loc;
               if(deadline) p+='<br><span class="popup-tag popup-deadline">📅 Deadline: '+deadline+'</span>';
